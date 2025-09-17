@@ -8,8 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Slate & Sky -->
-    <!-- Application Structure Plan: The application is designed as an interactive single-page dashboard. The core is a dynamic Gantt chart timeline that provides a high-level visual overview of the entire project. Users can click on any task in the timeline to see detailed information in a modal window. This task-oriented structure allows for quick access to specifics (like owners, dates, and deliverables) without losing the context of the overall project flow. The structure includes distinct sections for Team Roles & Workload (with a data visualization), a detailed Phase Breakdown, and Key Milestones, all accessible via a top navigation bar. This design was chosen to cater to different user needs: a project manager can view the timeline, while a team member can drill down into specific phase deliverables. It prioritizes clarity and interactive exploration over a static, linear document. -->
-    <!-- Visualization & Content Choices: Report Info: Team workload distribution (Michael/Luis ~80%, Iish ~15%, Kathy ~5%). Goal: Inform users of the planned effort distribution. Viz/Presentation: Doughnut Chart. Interaction: Hovering over segments shows the team member's name and workload percentage. Justification: A doughnut chart is an immediate and universally understood way to show parts of a whole, making the workload split instantly clear. Library: Chart.js (Canvas). Report Info: Project tasks with start/end dates and dependencies. Goal: Organize and visualize the project schedule over time. Viz/Presentation: HTML/CSS Gantt-style timeline. Interaction: Clicking on a task bar opens a modal with details. Justification: A Gantt view is the standard for project management, clearly showing task duration, overlap for parallel work, and sequencing for dependent tasks. Method: Custom JS with Tailwind CSS. Report Info: Detailed descriptions of SOW deliverables. Goal: Inform and Organize. Viz/Presentation: Accordion list. Interaction: Clicking a phase title expands it to show detailed tasks. Justification: An accordion prevents information overload by hiding details until requested, keeping the main view clean. Method: Custom JS. -->
+    <!-- Application Structure Plan: The application is designed as an interactive single-page dashboard. The core is a dynamic Gantt chart timeline that provides a high-level visual overview of the entire project. Users can click on any task in the timeline to see detailed information in a modal window. This task-oriented structure allows for quick access to specifics (like owners, dates, and deliverables) without losing the context of the overall project flow. The structure includes distinct sections for Team Roles & Workload (with a data visualization), a detailed Phase Breakdown, and a RACI Matrix, all accessible via a top navigation bar. This design was chosen to cater to different user needs: a project manager can view the timeline, while a team member can drill down into specific phase deliverables or check responsibilities in the RACI matrix. It prioritizes clarity and interactive exploration over a static, linear document. -->
+    <!-- Visualization & Content Choices: Report Info: Team workload distribution (Core Execution 75%, Strategic Advisory 15%, Content Expertise 10%). Goal: Inform users of the planned effort distribution. Viz/Presentation: Doughnut Chart. Interaction: Hovering over segments shows the team member's name and workload percentage. Justification: A doughnut chart is an immediate and universally understood way to show parts of a whole, making the workload split instantly clear. Library: Chart.js (Canvas). Report Info: Project tasks with start/end dates and dependencies. Goal: Organize and visualize the project schedule over time. Viz/Presentation: HTML/CSS Gantt-style timeline. Interaction: Clicking on a task bar opens a modal with details. Justification: A Gantt view is the standard for project management, clearly showing task duration, overlap for parallel work, and sequencing for dependent tasks. Method: Custom JS with Tailwind CSS. Report Info: Detailed descriptions of SOW deliverables by phase. Goal: Inform and Organize. Viz/Presentation: Accordion list. Interaction: Clicking a phase title expands it to show detailed tasks. Justification: An accordion prevents information overload by hiding details until requested, keeping the main view clean. Method: Custom JS. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -29,8 +29,9 @@
             font-size: 0.75rem;
             font-weight: 600;
             color: #475569; /* slate-600 */
+            position: -webkit-sticky; /* Safari support */
             position: sticky;
-            top: 64px;
+            top: 0;
             z-index: 10;
         }
         .gantt-task-name {
@@ -42,6 +43,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
             border-bottom: 1px solid #e2e8f0;
+            position: -webkit-sticky; /* Safari support */
+            position: sticky;
+            left: 0;
+            z-index: 5;
         }
         .gantt-row {
             display: contents;
@@ -73,6 +78,19 @@
         .modal-content {
             transition: transform 0.3s ease;
         }
+        .raci-table th, .raci-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0; /* slate-200 */
+        }
+        .raci-key {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            color: white;
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -87,17 +105,17 @@
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#timeline" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Timeline</a>
-                        <a href="#phases" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Phases & Deliverables</a>
-                        <a href="#team" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Team & Workload</a>
-                        <a href="#milestones" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Key Milestones</a>
+                        <a href="#phases" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Phases</a>
+                        <a href="#team" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Team</a>
+                        <a href="#raci" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Deliverables & RACI</a>
                     </div>
                 </div>
                 <div class="md:hidden">
                     <select id="mobile-nav" class="bg-slate-100 border border-slate-300 rounded-md px-3 py-2 text-sm font-medium">
                         <option value="#timeline">Timeline</option>
-                        <option value="#phases">Phases & Deliverables</option>
-                        <option value="#team">Team & Workload</option>
-                        <option value="#milestones">Milestones</option>
+                        <option value="#phases">Phases</option>
+                        <option value="#team">Team</option>
+                        <option value="#raci">Deliverables & RACI</option>
                     </select>
                 </div>
             </div>
@@ -108,96 +126,139 @@
 
         <!-- Project Overview -->
         <section id="overview" class="mb-12">
-            <h1 class="text-3xl font-bold text-slate-800 mb-2">Project Plan & Timeline</h1>
-            <p class="text-slate-600 max-w-4xl">This interactive dashboard outlines the detailed plan for the development of the California Youth Digital Citizenship and Literacy Curriculum, a collaboration between UCLA CTS and CDPH. The project officially runs from October 1, 2025, to June 30, 2026, with preliminary work starting September 15, 2025. Use this tool to track phases, deliverables, responsibilities, and key dates.</p>
+            <h1 class="text-3xl font-bold text-slate-800 mb-4">I. Strategic Framework & Project Charter</h1>
+            <p class="text-slate-600 mb-6 max-w-4xl">This section outlines the project's core mission, the principles that will guide our work, and the defined scope, ensuring every task aligns with our strategic objectives and contractual commitments.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-2 text-slate-800">1.1. Mission Statement</h3>
+                    <p class="text-slate-600">To develop and deliver a single, comprehensive, evidence-informed TK-12 digital citizenship and literacy curriculum that is uniquely tailored to the needs of California's diverse student population, empowering them to navigate the digital world safely, ethically, and responsibly.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-2 text-slate-800">1.3. Scope of Work at a Glance</h3>
+                    <ul class="list-disc list-inside text-slate-600 space-y-2">
+                        <li><strong>Core Curriculum:</strong> Develop 3 to 5 core modules, differentiated for three grade bands (TK-5, 6-8, 9-12).</li>
+                        <li><strong>Training Materials:</strong> Create 9 to 15 sample lesson plans (one per module, per grade band).</li>
+                        <li><strong>Foundational Research:</strong> Produce a 10-20 page Landscape Analysis & Literature Review.</li>
+                        <li><strong>Dissemination Support:</strong> Develop co-branded communications materials to support project rollout.</li>
+                    </ul>
+                </div>
+            </div>
+             <div class="mt-8 bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4 text-slate-800">1.2. Guiding Principles: Our Value Proposition</h3>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                    <div>
+                        <h4 class="font-bold text-sky-700">Equity-Centered Lens</h4>
+                        <p class="text-slate-600 mt-1">Explicitly address the digital experiences and technology access disparities of California's diverse student populations.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-teal-700">Restorative Practices</h4>
+                        <p class="text-slate-600 mt-1">Promote wellness and strengthen school climates as alternatives to exclusionary discipline for tech-related behaviors.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-indigo-700">Mental Health Integration</h4>
+                        <p class="text-slate-600 mt-1">Promote healthy media habits and support student well-being in digital spaces, in service of CDE initiatives.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-700">Rigorous, Research-Based</h4>
+                        <p class="text-slate-600 mt-1">Built on a foundation of scientific evidence from developmental psychology and neuroscience.</p>
+                    </div>
+                 </div>
+            </div>
         </section>
 
         <!-- Timeline Section -->
         <section id="timeline" class="mb-12">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">Interactive Project Timeline</h2>
-            <p class="text-slate-600 mb-6 max-w-4xl">This timeline provides a visual overview of the project's major tasks and phases. It illustrates how activities are scheduled, highlighting sequential dependencies and parallel workstreams. Click on any task bar to view more details, including owners, specific SOW deliverables, and dependencies.</p>
-            <div class="bg-white p-4 rounded-lg shadow-lg overflow-x-auto">
-                <div id="gantt-chart-container" class="min-w-[800px]"></div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">III. Master Project Timeline</h2>
+            <p class="text-slate-600 mb-6 max-w-4xl">This is the detailed, execution-focused roadmap for the project. The interactive timeline below provides a visual overview of the major tasks and phases. Click on any task bar to view more details.</p>
+            <div class="bg-white rounded-lg shadow-lg">
+                <div id="gantt-wrapper" class="overflow-auto" style="max-height: 60vh;">
+                     <div id="gantt-chart-container" class="min-w-[800px] p-1"></div>
+                </div>
             </div>
         </section>
 
         <!-- Phases & Deliverables -->
         <section id="phases" class="mb-12">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">Phases & Deliverables</h2>
-             <p class="text-slate-600 mb-6 max-w-4xl">The project is organized into distinct phases, from initial research to final delivery. Each phase contains specific tasks and deliverables as outlined in the Scope of Work. Click on a phase below to expand its details and see the associated activities and outcomes.</p>
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">Phased Work Plan Details</h2>
+             <p class="text-slate-600 mb-6 max-w-4xl">The project is organized into four distinct phases. Click on a phase below to expand its details and see the associated objective, timeframe, and key activities.</p>
             <div id="phases-accordion" class="space-y-4"></div>
         </section>
 
         <!-- Team & Workload -->
         <section id="team" class="mb-12">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">Team & Workload Distribution</h2>
-            <p class="text-slate-600 mb-6 max-w-4xl">This project relies on the collaborative efforts of the entire team, with work distributed based on roles and expertise. The visualization below shows the estimated workload allocation, while the cards detail each member's primary responsibilities and contributions.</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="md:col-span-1 bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-lg font-semibold mb-4 text-center">Estimated Workload</h3>
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">II. Team Structure & Operating Model</h2>
+            <p class="text-slate-600 mb-6 max-w-4xl">This section defines our team's roles, responsibilities, and the operational cadence that will drive progress and ensure seamless collaboration.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-4 text-center">2.1. Capacity Allocation</h3>
                     <div class="chart-container relative mx-auto" style="max-width: 300px; height: 300px; max-height: 300px;">
                         <canvas id="workloadChart"></canvas>
                     </div>
                 </div>
-                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h4 class="font-bold text-slate-800">Michael Corral & Luis Cisneros</h4>
-                        <p class="text-sm text-sky-600 font-semibold">Project Co-Leads (~70-80%)</p>
-                        <p class="text-sm text-slate-600 mt-2">Responsible for the majority of the "heavy lift" work, including literature review, curriculum drafting, lesson plan development, and day-to-day project management.</p>
+                <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-4">2.2. Operating Cadence & Communication</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-sky-500 font-bold w-24">Weekly:</span>
+                            <div class="flex-1">
+                                <p class="font-semibold">Internal Team Check-in</p>
+                                <p class="text-sm text-slate-600">Led by Michael to review progress, resolve roadblocks, and define weekly priorities.</p>
+                            </div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-sky-500 font-bold w-24">Monthly:</span>
+                            <div class="flex-1">
+                                <p class="font-semibold">Written CDPH Updates</p>
+                                <p class="text-sm text-slate-600">Brief email updates to the CDPH project manager to document progress.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sky-500 font-bold w-24">Quarterly:</span>
+                            <div class="flex-1">
+                                <p class="font-semibold">CDPH Progress Meetings</p>
+                                <p class="text-sm text-slate-600">Formal progress reviews with CDPH-OSH staff.</p>
+                            </div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-sky-500 font-bold w-24">Ongoing:</span>
+                            <div class="flex-1">
+                                <p class="font-semibold">Asynchronous Collaboration</p>
+                                <p class="text-sm text-slate-600">Work conducted in a shared Google Drive to maximize parallel progress.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+             <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold mb-4">2.3. Risk Management & Mitigation</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-rose-700">Risk 1: Political Sensitivities</h4>
+                        <p class="text-sm text-slate-600 mt-1">The educational landscape is highly politicized. Terms like "equity" and "SEL" can be contentious.</p>
+                        <p class="text-sm mt-2"><strong class="text-slate-700">Mitigation:</strong> Use CDPH Kickoff to gain explicit guidance on sensitive topics. Ish Rayaru will provide ongoing review to ensure framing is politically viable.</p>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h4 class="font-bold text-slate-800">Iish Ryaru</h4>
-                        <p class="text-sm text-teal-600 font-semibold">Contributor & Advisor (~10-15%)</p>
-                        <p class="text-sm text-slate-600 mt-2">Provides strategic guidance, particularly on policy alignment, educational systems integration, and review of materials for relevance and applicability in K-12 settings.</p>
-                    </div>
-                     <div class="bg-white p-6 rounded-lg shadow col-span-1 sm:col-span-2">
-                        <h4 class="font-bold text-slate-800">Kathy Doe</h4>
-                        <p class="text-sm text-amber-600 font-semibold">Content Expert & Advisor (~5%)</p>
-                        <p class="text-sm text-slate-600 mt-2">Serves as a subject matter expert, offering critical feedback, content review, and expert guidance at key stages of curriculum development to ensure evidence-based rigor.</p>
+                     <div>
+                        <h4 class="font-semibold text-rose-700">Risk 2: Compressed Timeline</h4>
+                        <p class="text-sm text-slate-600 mt-1">The final feedback and revision window (June 1-30, 2026) is extremely narrow.</p>
+                        <p class="text-sm mt-2"><strong class="text-slate-700">Mitigation:</strong> Utilize parallel workstreams in Phase 3. Phase 4 is reserved exclusively for CDPH feedback integration. Strict adherence to the May 31 draft submission deadline is critical.</p>
                     </div>
                 </div>
             </div>
         </section>
         
-        <!-- Key Milestones -->
-        <section id="milestones" class="mb-12">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">Key Milestones & Dates</h2>
-            <p class="text-slate-600 mb-6 max-w-4xl">This section highlights the most critical deadlines and checkpoints for the project. These milestones are essential for keeping the project on track and ensuring timely completion of all contractual obligations with the CDPH.</p>
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <ul class="space-y-4">
-                    <li class="flex items-start">
-                        <div class="flex-shrink-0 w-8 h-8 bg-sky-100 text-sky-700 rounded-full flex items-center justify-center font-bold">1</div>
-                        <div class="ml-4">
-                            <p class="font-semibold">Project Start & Kickoff</p>
-                            <p class="text-sm text-slate-600"><strong>Date:</strong> Sep 15 - Oct 10, 2025</p>
-                            <p class="text-sm text-slate-500">Includes internal planning and the official kickoff meeting with CDPH to align on goals and expectations.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start">
-                        <div class="flex-shrink-0 w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold">2</div>
-                        <div class="ml-4">
-                            <p class="font-semibold">Literature Review & Outline Complete</p>
-                            <p class="text-sm text-slate-600"><strong>Date:</strong> Dec 20, 2025</p>
-                            <p class="text-sm text-slate-500">Completion of the foundational research and the detailed curriculum framework, which will guide all content development.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start">
-                        <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold">3</div>
-                        <div class="ml-4">
-                            <p class="font-semibold">Draft Curriculum Submitted to CDPH</p>
-                            <p class="text-sm text-slate-600"><strong>Date:</strong> May 31, 2026</p>
-                            <p class="text-sm text-slate-500">Submission of the complete draft curriculum package, including all modules, lesson plans, and training materials for all grade bands, for official review.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start">
-                        <div class="flex-shrink-0 w-8 h-8 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center font-bold">4</div>
-                        <div class="ml-4">
-                            <p class="font-semibold">Final Project Completion & Delivery</p>
-                            <p class="text-sm text-slate-600"><strong>Date:</strong> June 30, 2026</p>
-                            <p class="text-sm text-slate-500">Final, revised curriculum package delivered to CDPH, incorporating all feedback and marking the official end of the project term.</p>
-                        </div>
-                    </li>
-                </ul>
+        <!-- RACI Section -->
+        <section id="raci" class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">IV. Master Deliverable Schedule & RACI Matrix</h2>
+            <p class="text-slate-600 mb-6 max-w-4xl">This table provides a comprehensive overview of all contractual deliverables and clarifies team roles for each, ensuring clear ownership and accountability.</p>
+            <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                 <div class="flex items-center space-x-4 mb-4 text-sm">
+                    <span class="font-bold">RACI Key:</span>
+                    <span><span class="raci-key bg-sky-500">R</span> = Responsible</span>
+                    <span><span class="raci-key bg-teal-500">A</span> = Accountable</span>
+                    <span><span class="raci-key bg-indigo-500">C</span> = Consulted</span>
+                    <span><span class="raci-key bg-amber-500">I</span> = Informed</span>
+                </div>
+                <table id="raci-table" class="w-full text-sm raci-table"></table>
             </div>
         </section>
 
@@ -216,16 +277,12 @@
                     <span id="modalDuration"></span>
                 </div>
                 <div class="mb-3">
-                    <strong class="block text-slate-600">Owner(s):</strong>
+                    <strong class="block text-slate-600">Owner (DRI):</strong>
                     <span id="modalOwner"></span>
                 </div>
                 <div class="mb-3">
-                    <strong class="block text-slate-600">Description & SOW Link:</strong>
+                    <strong class="block text-slate-600">Details / Handoffs:</strong>
                     <p id="modalDetails" class="text-slate-700"></p>
-                </div>
-                <div>
-                    <strong class="block text-slate-600">Dependencies:</strong>
-                    <p id="modalDependencies" class="text-slate-700"></p>
                 </div>
             </div>
         </div>
@@ -235,65 +292,75 @@
         document.addEventListener('DOMContentLoaded', function() {
             const projectData = {
                 team: [
-                    { name: "Michael Corral & Luis Cisneros", workload: 80, color: '#0ea5e9' }, // sky-500
-                    { name: "Iish Ryaru", workload: 15, color: '#14b8a6' }, // teal-500
-                    { name: "Kathy Doe", workload: 5, color: '#f59e0b' } // amber-500
+                    { name: "Core Execution (Michael & Luis)", workload: 75, color: '#0ea5e9' },
+                    { name: "Strategic Advisory (Ish)", workload: 15, color: '#14b8a6' },
+                    { name: "Content Expertise (Kathy)", workload: 10, color: '#f59e0b' }
                 ],
                 phases: [
                     {
-                        name: "Phase 0: Project Initiation & Planning",
-                        id: "phase0",
-                        description: "Establish the project foundation, align with CDPH, and finalize the detailed work plan. This phase ensures all stakeholders have a shared understanding of the project's goals, scope, and timeline.",
+                        name: "Phase 1: Discovery, Research, and Framework Development",
+                        id: "phase1",
+                        description: "Objective: To establish a solid evidence base and a clear strategic framework that will guide all curriculum development.",
+                        timeframe: "September 15, 2025 – December 31, 2025",
                         color: 'bg-sky-500',
                         tasks: [
-                            { id: 1, name: "Internal Kickoff & Detailed Planning", start: "2025-09-15", end: "2025-09-30", owner: ["Michael C.", "Luis C."], details: "Internal project planning, refinement of timeline, role clarification, and development of initial drafts for CDPH review. Corresponds to initial planning activities.", dependencies: [] },
-                            { id: 2, name: "Official CDPH Kickoff", start: "2025-10-01", end: "2025-10-10", owner: ["Michael C.", "Luis C.", "Iish R."], details: "Formal kickoff meeting with CDPH stakeholders to align on the scope of work, deliverables, communication plan, and reporting schedule.", dependencies: ["Internal Planning"] }
+                            { id: 1, name: "Project Initiation & Alignment", start: "2025-09-15", end: "2025-09-22", owner: ["Michael", "Luis"], details: "Internal Team Kickoff Meeting to align on this plan." },
+                            { id: 2, name: "CDPH Kickoff & Expectation Setting", start: "2025-09-23", end: "2025-09-30", owner: ["Full Team"], details: "Critical: Gain clarity on political sensitivities, 'California-specific' definition, and alignment with CDE/Common Sense Media." },
+                            { id: 3, name: "Comprehensive Desk Research", start: "2025-10-01", end: "2025-12-15", owner: ["Luis", "Michael"], details: "Research synthesis to be reviewed by Kathy for scientific rigor." },
+                            { id: 4, name: "Internal Conceptual Framework Dev", start: "2025-12-01", end: "2025-12-31", owner: ["Michael", "Luis"], details: "Draft framework reviewed by Ish (viability) and Kathy (science). Finalized framework is a prerequisite for Phase 2." }
                         ]
                     },
                     {
-                        name: "Phase 1: Research & Framework Development",
-                        id: "phase1",
-                        description: "Conduct foundational research and develop the strategic framework that will guide all curriculum content. This includes a comprehensive literature review and the creation of a detailed curriculum outline.",
+                        name: "Phase 2: Content Development – Landscape Analysis & Curriculum Outline",
+                        id: "phase2",
+                        description: "Objective: To produce the project's first official deliverables, translating our research into a foundational white paper and a detailed curriculum blueprint.",
+                        timeframe: "January 1, 2026 – March 31, 2026",
                         color: 'bg-teal-500',
                         tasks: [
-                            { id: 3, name: "Literature Review", start: "2025-09-15", end: "2025-11-30", owner: ["Luis C.", "Michael C."], details: "Conduct an extensive literature review to establish an evidence-based foundation for the curriculum. SOW Deliverable 2.", dependencies: ["Internal Planning"] },
-                            { id: 4, name: "Detailed Curriculum Outline", start: "2025-11-15", end: "2025-12-20", owner: ["Michael C.", "Luis C."], details: "Develop a detailed curriculum outline covering core modules and themes for all grade bands. SOW Deliverable 3.", dependencies: ["Literature Review"] }
+                            { id: 5, name: "Draft Landscape Analysis (D1)", start: "2026-01-01", end: "2026-02-14", owner: ["Luis", "Michael"], details: "Internal review by Kathy (science) and Ish (policy) from Feb 15-24." },
+                            { id: 6, name: "Draft Detailed Curriculum Outline (D3)", start: "2026-02-15", end: "2026-03-15", owner: ["Luis", "Michael"], details: "Internal review by Ish for implementation feasibility." },
+                            { id: 7, name: "Finalize Landscape Analysis (D2)", start: "2026-03-15", end: "2026-03-30", owner: ["Michael", "Luis"], details: "Revisions begin immediately upon receipt of CDPH feedback." }
                         ]
                     },
                     {
-                        name: "Phase 2: Curriculum & Materials Development",
-                        id: "phase2",
-                        description: "The core 'heavy lift' phase involving the drafting of all curriculum content, including modules, lesson plans, and supplementary training materials, differentiated for each grade band.",
+                        name: "Phase 3: Intensive Curriculum & Training Material Production",
+                        id: "phase3",
+                        description: "Objective: To execute the 'heavy lift' of drafting all six curriculum and training material deliverables in parallel.",
+                        timeframe: "April 1, 2026 – May 31, 2026",
                         color: 'bg-indigo-500',
                         tasks: [
-                            { id: 5, name: "Draft Curriculum Modules (All Bands)", start: "2026-01-02", end: "2026-04-30", owner: ["Michael C.", "Luis C."], details: "Draft content for 3-5 core modules, differentiated for grade bands TK-5, 6-8, and 9-12. SOW Item 1b & 1c.", dependencies: ["Curriculum Outline"] },
-                            { id: 6, name: "Draft Lesson Plans (TK-5)", start: "2026-01-15", end: "2026-05-15", owner: ["Michael C.", "Luis C."], details: "Develop specific lesson plans for the TK-5 grade band. SOW Deliverable 4.", dependencies: ["Draft Modules"] },
-                            { id: 7, name: "Draft Lesson Plans (6-8)", start: "2026-01-15", end: "2026-05-15", owner: ["Luis C.", "Michael C."], details: "Develop specific lesson plans for the 6-8 grade band. SOW Deliverable 5.", dependencies: ["Draft Modules"] },
-                            { id: 8, name: "Draft Lesson Plans (9-12)", start: "2026-01-15", end: "2026-05-15", owner: ["Michael C.", "Luis C."], details: "Develop specific lesson plans for the 9-12 grade band. SOW Deliverable 6.", dependencies: ["Draft Modules"] },
-                            { id: 9, name: "Develop Training Materials (All Bands)", start: "2026-03-01", end: "2026-05-20", owner: ["Luis C.", "Michael C."], details: "Create supporting training materials (e.g., slide decks, facilitator guides) for each grade band. SOW Deliverables 7, 8, 9.", dependencies: ["Draft Modules"] }
+                            { id: 8, name: "Develop Standardized Templates", start: "2026-04-01", end: "2026-04-10", owner: ["Michael", "Luis"], details: "Final templates ensure consistency across all deliverables." },
+                            { id: 9, name: "Parallel Drafting: TK-5 (D4, D5)", start: "2026-04-11", end: "2026-05-20", owner: ["Michael"], details: "Drafting of TK-5 curriculum modules and lesson plans." },
+                            { id: 10, name: "Parallel Drafting: 6-8 (D6, D7)", start: "2026-04-11", end: "2026-05-20", owner: ["Luis"], details: "Drafting of 6-8 curriculum modules and lesson plans." },
+                            { id: 11, name: "Parallel Drafting: 9-12 (D8, D9)", start: "2026-04-11", end: "2026-05-20", owner: ["Michael", "Luis"], details: "Drafting of 9-12 curriculum modules and lesson plans." },
+                            { id: 12, name: "Integrated Internal Review Cycle", start: "2026-05-21", end: "2026-05-28", owner: ["Full Team"], details: "Kathy reviews for developmental appropriateness. Ish reviews for teacher usability." }
                         ]
                     },
                     {
-                        name: "Phase 3: Review, Revision & Finalization",
-                        id: "phase3",
-                        description: "This phase focuses on refining the drafted materials through internal and external review cycles, incorporating feedback, and preparing the final, polished curriculum package for delivery.",
+                        name: "Phase 4: Finalization, Feedback Integration, & Delivery",
+                        id: "phase4",
+                        description: "Objective: To exclusively focus on incorporating CDPH feedback and delivering a polished, comprehensive final package.",
+                        timeframe: "June 1, 2026 – June 30, 2026",
                         color: 'bg-amber-500',
                         tasks: [
-                            { id: 10, name: "Expert & Internal Review", start: "2026-05-01", end: "2026-05-30", owner: ["All Team"], details: "Internal team and expert advisor (Kathy Doe) review of the complete draft curriculum package.", dependencies: ["All Drafts Complete"] },
-                            { id: 11, name: "Submit Draft to CDPH", start: "2026-05-31", end: "2026-05-31", owner: ["Michael C.", "Luis C."], details: "Submit the complete draft curriculum package to CDPH for official feedback. SOW Deliverable 10.", dependencies: ["Internal Review"] },
-                            { id: 12, name: "Incorporate CDPH Feedback & Finalize", start: "2026-06-01", end: "2026-06-25", owner: ["Michael C.", "Luis C."], details: "Revise all materials based on CDPH feedback and prepare the final deliverable package.", dependencies: ["Submit Draft to CDPH"] },
-                            { id: 13, name: "Final Delivery to CDPH", start: "2026-06-30", end: "2026-06-30", owner: ["Michael C.", "Luis C."], details: "Deliver the final, completed Youth Digital Citizenship and Literacy curriculum package. SOW Deliverable 10.", dependencies: ["Incorporate Feedback"] }
-                        ]
-                    },
-                    {
-                        name: "Phase 4: Communication & Dissemination (Ongoing)",
-                        id: "phase4",
-                        description: "This ongoing workstream runs parallel to the main project phases, focusing on creating materials to support the dissemination and promotion of the project and its outputs.",
-                        color: 'bg-purple-500',
-                        tasks: [
-                            { id: 14, name: "Develop Co-Branded Comms Materials", start: "2025-10-15", end: "2026-06-30", owner: ["Michael C.", "Luis C."], details: "Ongoing development of co-branded materials (press releases, newsletters, social media posts) to support project dissemination. SOW Deliverable 11.", dependencies: ["Official CDPH Kickoff"] }
+                            { id: 13, name: "CDPH Feedback Integration", start: "2026-06-01", end: "2026-06-20", owner: ["Michael", "Luis"], details: "Systematically address all feedback from CDPH on D4-D9." },
+                            { id: 14, name: "Final Package Assembly & Formatting", start: "2026-06-21", end: "2026-06-27", owner: ["Michael", "Luis"], details: "Assemble all revised components into a single, cohesive package." },
+                            { id: 15, name: "Final Transmittal to CDPH (D10)", start: "2026-06-28", end: "2026-06-30", owner: ["Michael"], details: "Submit clean and tracked-changes versions as required by contract." }
                         ]
                     }
+                ],
+                raciData: [
+                    { id: 'D1', deliverable: 'Landscape Analysis & Lit Review', dueDate: 'Feb 28, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Kathy D., Ish R.', I: 'Joe B.' },
+                    { id: 'D2', deliverable: '[FINAL] Landscape Analysis', dueDate: '2 wks post-feedback', R: 'Luis C.', A: 'Michael C.', C: 'CDPH', I: '' },
+                    { id: 'D3', deliverable: 'Detailed Curriculum Outline', dueDate: 'Mar 30, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Ish R., Kathy D.', I: 'Joe B.' },
+                    { id: 'D4', deliverable: 'Curriculum: Grades TK-5', dueDate: 'May 31, 2026', R: 'Michael C.', A: 'Michael C.', C: 'Kathy D.', I: 'Luis C.' },
+                    { id: 'D5', deliverable: 'Training Materials: Grades TK-5', dueDate: 'May 31, 2026', R: 'Michael C.', A: 'Michael C.', C: 'Ish R.', I: 'Luis C.' },
+                    { id: 'D6', deliverable: 'Curriculum: Grades 6-8', dueDate: 'May 31, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Kathy D.', I: 'Michael C.' },
+                    { id: 'D7', deliverable: 'Training Materials: Grades 6-8', dueDate: 'May 31, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Ish R.', I: 'Michael C.' },
+                    { id: 'D8', deliverable: 'Curriculum: Grades 9-12', dueDate: 'May 31, 2026', R: 'Michael C., Luis C.', A: 'Michael C.', C: 'Kathy D.', I: '' },
+                    { id: 'D9', deliverable: 'Training Materials: Grades 9-12', dueDate: 'May 31, 2026', R: 'Michael C., Luis C.', A: 'Michael C.', C: 'Ish R.', I: '' },
+                    { id: 'D10', deliverable: '[FINAL] Complete K-12 Package', dueDate: 'June 30, 2026', R: 'Michael C., Luis C.', A: 'Michael C.', C: 'Joe B., CDPH', I: '' },
+                    { id: 'D11', deliverable: 'Co-Branded Comms Materials', dueDate: 'Ongoing', R: 'Geneva S.', A: 'Michael C.', C: 'Ish R.', I: 'Full Team' },
                 ]
             };
 
@@ -318,29 +385,8 @@
                     maintainAspectRatio: false,
                     cutout: '60%',
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += context.parsed + '%';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
+                        legend: { position: 'bottom', labels: { padding: 20, font: { size: 12 } } },
+                        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}%` } }
                     }
                 }
             });
@@ -355,11 +401,9 @@
                 months.push(new Date(currentDate));
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
-
-            const totalDays = (projectEndDate - projectStartDate) / (1000 * 60 * 60 * 24);
             
             let ganttHTML = '<div class="gantt-grid" style="grid-template-columns: 200px repeat(' + (months.length -1) +', 1fr);">';
-            ganttHTML += '<div class="gantt-header">Task</div>';
+            ganttHTML += '<div class="gantt-header" style="position: sticky; left: 0; z-index:11;">Task</div>';
             months.slice(0, -1).forEach(month => {
                 ganttHTML += `<div class="gantt-header">${month.toLocaleString('default', { month: 'short' })} '${month.getFullYear().toString().slice(-2)}</div>`;
             });
@@ -371,7 +415,6 @@
                     const nextMonth = months[index+1];
                     const taskStart = new Date(task.start);
                     const taskEnd = new Date(task.end);
-
                     const start = new Date(Math.max(month, taskStart));
                     const end = new Date(Math.min(nextMonth, taskEnd));
 
@@ -379,15 +422,13 @@
                         const monthDays = (nextMonth - month) / (1000 * 60 * 60 * 24);
                         const left = ((start - month) / (1000 * 60 * 60 * 24)) / monthDays * 100;
                         const width = ((end - start) / (1000 * 60 * 60 * 24)) / monthDays * 100;
-
-                         ganttHTML += `<div class="gantt-cell"><div class="gantt-bar ${task.phaseColor}" style="left:${left}%; width:${width}%" data-task-id="${task.id}"></div></div>`;
+                        ganttHTML += `<div class="gantt-cell"><div class="gantt-bar ${task.phaseColor}" style="left:${left}%; width:${width}%" data-task-id="${task.id}"></div></div>`;
                     } else {
                         ganttHTML += `<div class="gantt-cell"></div>`;
                     }
                 });
                 ganttHTML += `</div>`;
             });
-
             ganttHTML += '</div>';
             ganttContainer.innerHTML = ganttHTML;
 
@@ -395,17 +436,18 @@
             const accordionContainer = document.getElementById('phases-accordion');
             let accordionHTML = '';
             projectData.phases.forEach(phase => {
+                const phaseTasks = allTasks.filter(t => t.phaseName === phase.name);
                 accordionHTML += `
                     <div class="bg-white rounded-lg shadow-md overflow-hidden">
                         <button class="accordion-toggle w-full p-4 text-left font-semibold text-slate-800 flex justify-between items-center hover:bg-slate-50 transition">
-                            <span>${phase.name}</span>
+                            <span>${phase.name} <span class="text-sm font-normal text-slate-500 ml-2">(${phase.timeframe})</span></span>
                             <span class="transform transition-transform duration-300">&#9662;</span>
                         </button>
                         <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
                             <div class="p-4 border-t border-slate-200">
                                 <p class="text-sm text-slate-600 mb-4">${phase.description}</p>
                                 <ul class="list-disc pl-5 space-y-2 text-sm">
-                                    ${phase.tasks.map(task => `<li><strong>${task.name}:</strong> <span class="text-slate-500">${task.details}</span></li>`).join('')}
+                                    ${phaseTasks.map(task => `<li><strong>${task.name} (DRI: ${task.owner.join(', ')}):</strong> <span class="text-slate-500">${task.details}</span></li>`).join('')}
                                 </ul>
                             </div>
                         </div>
@@ -423,13 +465,31 @@
                         arrow.style.transform = 'rotate(0deg)';
                     } else {
                         document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
-                         document.querySelectorAll('.accordion-toggle span:last-child').forEach(a => a.style.transform = 'rotate(0deg)');
+                        document.querySelectorAll('.accordion-toggle span:last-child').forEach(a => a.style.transform = 'rotate(0deg)');
                         content.style.maxHeight = content.scrollHeight + "px";
                         arrow.style.transform = 'rotate(180deg)';
                     }
                 });
             });
-
+            
+            // RACI Table
+            const raciTable = document.getElementById('raci-table');
+            let raciHTML = `<thead><tr class="bg-slate-50"><th>ID</th><th>Deliverable</th><th>Due Date</th><th>R</th><th>A</th><th>C</th><th>I</th></tr></thead><tbody>`;
+            projectData.raciData.forEach(item => {
+                raciHTML += `
+                    <tr>
+                        <td class="font-semibold text-slate-500">${item.id}</td>
+                        <td>${item.deliverable}</td>
+                        <td class="whitespace-nowrap">${item.dueDate}</td>
+                        <td>${item.R}</td>
+                        <td>${item.A}</td>
+                        <td>${item.C}</td>
+                        <td>${item.I}</td>
+                    </tr>
+                `;
+            });
+            raciHTML += `</tbody>`;
+            raciTable.innerHTML = raciHTML;
 
             // Modal Logic
             const modal = document.getElementById('taskModal');
@@ -440,53 +500,32 @@
                 if (e.target.classList.contains('gantt-bar')) {
                     const taskId = parseInt(e.target.dataset.taskId);
                     const task = allTasks.find(t => t.id === taskId);
-                    
                     if (task) {
                         document.getElementById('modalTitle').textContent = task.name;
                         document.getElementById('modalDuration').textContent = `${task.start} to ${task.end}`;
                         document.getElementById('modalOwner').textContent = task.owner.join(', ');
                         document.getElementById('modalDetails').textContent = task.details;
-                        document.getElementById('modalDependencies').textContent = task.dependencies.length > 0 ? task.dependencies.join(', ') : 'None';
-                        
                         modal.classList.remove('opacity-0', 'pointer-events-none');
                         modalContent.classList.remove('scale-95');
                     }
                 }
             });
 
-            closeModalBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-
-            function closeModal() {
+            const closeModal = () => {
                 modal.classList.add('opacity-0');
                 modalContent.classList.add('scale-95');
-                 setTimeout(() => {
-                    modal.classList.add('pointer-events-none');
-                }, 300);
-            }
+                 setTimeout(() => modal.classList.add('pointer-events-none'), 300);
+            };
 
-            // Smooth scrolling for nav links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                });
-            });
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-            // Mobile nav
-            document.getElementById('mobile-nav').addEventListener('change', function(e){
-                 document.querySelector(e.target.value).scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-            });
+            // Smooth scrolling
+            const handleNav = (selector) => {
+                 document.querySelector(selector).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); handleNav(a.getAttribute('href')); }));
+            document.getElementById('mobile-nav').addEventListener('change', e => handleNav(e.target.value));
         });
     </script>
 </body>
