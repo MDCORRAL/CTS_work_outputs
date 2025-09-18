@@ -435,7 +435,44 @@
                 </div>
             </div>
         </nav>
+        <div class="border-t border-slate-200 bg-slate-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+                <div>
+                    <p class="uppercase tracking-wide text-xs text-slate-500">Next OSH Touchpoint</p>
+                    <p class="text-slate-700 font-semibold" id="touchpointSummary"></p>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center gap-3">
+                    <label class="flex items-center gap-2">
+                        <span class="text-slate-600">Date</span>
+                        <input type="date" id="touchpointDate" class="editable-input border border-slate-300 rounded-md px-2 py-1 text-sm" />
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <span class="text-slate-600">Focus</span>
+                        <input type="text" id="touchpointFocus" class="editable-input border border-slate-300 rounded-md px-2 py-1 text-sm w-56" placeholder="e.g. Curriculum Outline Review" />
+                    </label>
+                </div>
+            </div>
+        </div>
     </header>
+
+    <section class="bg-indigo-50 border-b border-indigo-200">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div class="flex items-start gap-3">
+                <span class="text-indigo-600 text-xl font-bold" aria-hidden="true">!</span>
+                <div>
+                    <p class="text-indigo-900 font-semibold">Compliance & Transmission Commitments</p>
+                    <ul class="list-disc list-inside text-indigo-800 text-sm space-y-1">
+                        <li>Maintain regular OSH metrics & progress reporting touchpoints to keep compliance checks proactive.</li>
+                        <li>Package clean + tracked versions of every deliverable for OSH to retain and use in perpetuity.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bg-white border border-indigo-200 rounded-md p-4 text-sm shadow-sm">
+                <p class="font-semibold text-indigo-900">Final handoff checklist</p>
+                <p class="text-indigo-800">Track progress in <a href="#final-package-checklist" class="text-sky-600 underline">Phase 4 -> Final Handoff Requirements</a>.</p>
+            </div>
+        </div>
+    </section>
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
 
@@ -443,23 +480,33 @@
         <section id="overview" class="mb-12">
             <h1 class="text-3xl font-bold text-slate-800 mb-4">I. Strategic Framework & Project Charter</h1>
             <p class="text-slate-600 mb-6 max-w-4xl">This section outlines the project's core mission, the principles that will guide our work, and the defined scope, ensuring every task aligns with our strategic objectives and contractual commitments.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h3 class="text-lg font-semibold mb-2 text-slate-800">1.1. Mission Statement</h3>
-                    <p class="text-slate-600">To develop and deliver a single, comprehensive, evidence-informed TK-12 digital citizenship and literacy curriculum that is uniquely tailored to the needs of California's diverse student population, empowering them to navigate the digital world safely, ethically, and responsibly.</p>
+                    <p class="text-slate-600">To develop and deliver a comprehensive, evidence-informed 0-18 digital citizenship and literacy curriculum tailored to California's diverse student population so young people can navigate the digital world safely, ethically, and responsibly.</p>
                 </div>
                  <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold mb-2 text-slate-800">1.3. Scope of Work at a Glance</h3>
+                    <h3 class="text-lg font-semibold mb-2 text-slate-800">1.2. Scope of Work at a Glance</h3>
                     <ul class="list-disc list-inside text-slate-600 space-y-2">
-                        <li><strong>Core Curriculum:</strong> Develop 3 to 5 core modules, differentiated for three grade bands (TK-5, 6-8, 9-12).</li>
+                        <li><strong>Core Curriculum:</strong> Develop 3 to 5 core modules, differentiated for three age bands (0-5, 5-11, 12-18).</li>
                         <li><strong>Training Materials:</strong> Create 9 to 15 sample lesson plans (one per module, per grade band).</li>
                         <li><strong>Foundational Research:</strong> Produce a 10-20 page Landscape Analysis & Literature Review.</li>
                         <li><strong>Dissemination Support:</strong> Develop co-branded communications materials to support project rollout.</li>
                     </ul>
                 </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-2 text-slate-800">1.3. Final Package Spec (CDE-Modeled)</h3>
+                    <p class="text-slate-600 mb-3">Anchor every final draft to the Ethnic Studies model format so D10 aligns with contract language.</p>
+                    <ul class="list-disc list-inside text-slate-600 space-y-1">
+                        <li>Ordering: Executive summary -> Age-band modules -> Training toolkit -> Appendices.</li>
+                        <li>Artifacts: Curriculum scope & sequence, sample lessons, facilitator slide deck, implementation notes.</li>
+                        <li>Reference: <a href="https://www.cde.ca.gov/ci/cr/cf/esmc.asp" target="_blank" class="text-sky-600 underline">CDE Ethnic Studies Model Curriculum</a>.</li>
+                        <li>Internal QA: <a href="#final-package-checklist" class="text-sky-600 underline">Run the Final Handoff checklist</a> before release.</li>
+                    </ul>
+                </div>
             </div>
              <div class="mt-8 bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold mb-4 text-slate-800">1.2. Guiding Principles: Our Value Proposition</h3>
+                <h3 class="text-lg font-semibold mb-4 text-slate-800">1.4. Guiding Principles: Our Value Proposition</h3>
                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
                     <div>
                         <h4 class="font-bold text-sky-700">Equity-Centered Lens</h4>
@@ -478,6 +525,14 @@
                         <p class="text-slate-600 mt-1">Built on a foundation of scientific evidence from developmental psychology and neuroscience.</p>
                     </div>
                  </div>
+            </div>
+            <div class="mt-8 bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4 text-slate-800">1.5. Policy & Rationale Snapshot</h3>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 text-sm">
+                    <li><a href="https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240AB1282" target="_blank" class="text-sky-600 underline">AB 1282 (2023)</a>: Requires policy recommendations on youth social media mental health impacts by Dec 31, 2026 - this curriculum provides an implementation lever.</li>
+                    <li><a href="https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240SB326" target="_blank" class="text-sky-600 underline">SB 326 / BHSA</a>: Reinvests in population-based prevention; CDPH's OSH role is to scale statewide protective factors.</li>
+                    <li>BHSA Prevention Priorities: Youth mental wellness, family supports, and safe digital environments - explicitly cite these in stakeholder briefs.</li>
+                </ul>
             </div>
         </section>
 
@@ -526,11 +581,18 @@
                                 <p class="text-sm text-slate-600">Led by Michael to review progress, resolve roadblocks, and define weekly priorities.</p>
                             </div>
                         </li>
-                         <li class="flex items-start">
+                        <li class="flex items-start">
                             <span class="text-sky-500 font-bold w-24">Monthly:</span>
                             <div class="flex-1">
                                 <p class="font-semibold">Written CDPH Updates</p>
-                                <p class="text-sm text-slate-600">Brief email updates to the CDPH project manager to document progress.</p>
+                                <p class="text-sm text-slate-600">Brief metrics note to OSH/CDPH summarizing progress, risks, and uptake insights.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sky-500 font-bold w-24">Biweekly:</span>
+                            <div class="flex-1">
+                                <p class="font-semibold">OSH Metrics Touchpoint</p>
+                                <p class="text-sm text-slate-600">Standing 30-minute sync with Erin to review dashboard numbers, contract deliverable status, and unlock support.</p>
                             </div>
                         </li>
                         <li class="flex items-start">
@@ -550,7 +612,7 @@
                     </ul>
                 </div>
             </div>
-             <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
                 <h3 class="text-lg font-semibold mb-4">4.3. Risk Management & Mitigation</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -564,6 +626,11 @@
                         <p class="text-sm mt-2"><strong class="text-slate-700">Mitigation:</strong> Utilize parallel workstreams in Phase 3. Phase 4 is reserved exclusively for CDPH feedback integration. Strict adherence to the May 31 draft submission deadline is critical.</p>
                     </div>
                 </div>
+            </div>
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold mb-4">4.4. Monthly Reporting Dashboard</h3>
+                <p class="text-slate-600 text-sm mb-4">Capture uptake metrics in one place for the monthly OSH note. Update counts live; values persist in this session for easy copy-out to sheets later.</p>
+                <div id="metrics-dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
         </section>
         
@@ -587,6 +654,15 @@
                     <span><span class="raci-key bg-amber-500">I</span> = Informed</span>
                 </div>
                 <table id="raci-table" class="w-full text-sm raci-table"></table>
+            </div>
+        </section>
+
+        <!-- Dissemination Workbench -->
+        <section id="dissemination" class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">VI. Dissemination Workbench (D11)</h2>
+            <p class="text-slate-600 mb-6 max-w-3xl">Track comms drafts, approval status, and channel assignments so D11 deliverables move in lockstep with curriculum milestones.</p>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="dissemination-grid"></div>
             </div>
         </section>
 
@@ -699,10 +775,21 @@
                 ],
                 phases: [
                     {
+                        name: "Phase 0: Soft Runway (Non-Billable)",
+                        id: "phase0",
+                        description: "Objective: Stand up advisory workflows and pre-contract scaffolding so formal production begins with clear guardrails.",
+                        timeframe: "September 1, 2025 - December 31, 2025",
+                        color: 'bg-slate-500',
+                        tasks: [
+                            { id: 90, name: "Advisory Group: convene & schedule", start:"2025-10-01", end:"2025-10-31", owner:["Michael","Luis"], details:"Recruit educator, child development, and community advisors; lock 2026 touchpoints." },
+                            { id: 91, name: "Draft Conceptual Framework (internal)", start:"2025-10-01", end:"2025-12-15", owner:["Michael","Luis"], details:"Iterate with advisors; prep for January formal drafting." }
+                        ]
+                    },
+                    {
                         name: "Phase 1: Discovery, Research, and Framework Development",
                         id: "phase1",
                         description: "Objective: To establish a solid evidence base and a clear strategic framework that will guide all curriculum development.",
-                        timeframe: "September 15, 2025 – December 31, 2025",
+                        timeframe: "September 15, 2025 - December 31, 2025",
                         color: 'bg-sky-500',
                         tasks: [
                             { id: 1, name: "Project Initiation & Alignment", start: "2025-09-15", end: "2025-09-22", owner: ["Michael", "Luis"], details: "Internal Team Kickoff Meeting to align on this plan." },
@@ -712,58 +799,130 @@
                         ]
                     },
                     {
-                        name: "Phase 2: Content Development – Landscape Analysis & Curriculum Outline",
+                        name: "Phase 2: Content Development - Landscape Analysis & Curriculum Outline",
                         id: "phase2",
                         description: "Objective: To produce the project's first official deliverables, translating our research into a foundational white paper and a detailed curriculum blueprint.",
-                        timeframe: "January 1, 2026 – March 31, 2026",
+                        timeframe: "January 1, 2026 - March 31, 2026",
                         color: 'bg-teal-500',
                         tasks: [
                             { id: 5, name: "Draft Landscape Analysis (D1)", start: "2026-01-01", end: "2026-02-14", owner: ["Luis", "Michael"], details: "Internal review by Kathy (science) and Iish (policy) from Feb 15-24." },
                             { id: 6, name: "Draft Detailed Curriculum Outline (D3)", start: "2026-02-15", end: "2026-03-15", owner: ["Luis", "Michael"], details: "Internal review by Iish for implementation feasibility." },
-                            { id: 7, name: "Finalize Landscape Analysis (D2)", start: "2026-03-15", end: "2026-03-30", owner: ["Michael", "Luis"], details: "Revisions begin immediately upon receipt of CDPH feedback." }
+                            { id: 7, name: "Finalize Landscape Analysis (D2)", start: "2026-03-15", end: "2026-03-30", owner: ["Michael", "Luis"], details: "Revisions begin immediately upon receipt of CDPH feedback." },
+                            { id: 16, name: "Initiate Family Engagement Strategy", start: "2026-02-15", end: "2026-03-31", owner: ["Michael", "Luis"], details: "Outline audiences, engagement channels, and draft artifacts for feedback." }
                         ]
                     },
                     {
                         name: "Phase 3: Intensive Curriculum & Training Material Production",
                         id: "phase3",
                         description: "Objective: To execute the 'heavy lift' of drafting all six curriculum and training material deliverables in parallel.",
-                        timeframe: "April 1, 2026 – May 31, 2026",
+                        timeframe: "April 1, 2026 - May 31, 2026",
                         color: 'bg-indigo-500',
                         tasks: [
                             { id: 8, name: "Develop Standardized Templates", start: "2026-04-01", end: "2026-04-10", owner: ["Michael", "Luis"], details: "Final templates ensure consistency across all deliverables." },
-                            { id: 9, name: "Parallel Drafting: TK-5 (D4, D5)", start: "2026-04-11", end: "2026-05-20", owner: ["Michael"], details: "Drafting of TK-5 curriculum modules and lesson plans." },
-                            { id: 10, name: "Parallel Drafting: 6-8 (D6, D7)", start: "2026-04-11", end: "2026-05-20", owner: ["Luis"], details: "Drafting of 6-8 curriculum modules and lesson plans." },
-                            { id: 11, name: "Parallel Drafting: 9-12 (D8, D9)", start: "2026-04-11", end: "2026-05-20", owner: ["Michael", "Luis"], details: "Drafting of 9-12 curriculum modules and lesson plans." },
-                            { id: 12, name: "Integrated Internal Review Cycle", start: "2026-05-21", end: "2026-05-28", owner: ["Full Team"], details: "Kathy reviews for developmental appropriateness. Iish reviews for teacher usability." }
+                            { id: 9, name: "Parallel Drafting: Ages 0-5 (D4, D5)", start: "2026-04-11", end: "2026-05-20", owner: ["Michael"], details: "Drafting of Ages 0-5 curriculum modules and educator training materials." },
+                            { id: 10, name: "Parallel Drafting: Ages 5-11 (D6, D7)", start: "2026-04-11", end: "2026-05-20", owner: ["Luis"], details: "Drafting of Ages 5-11 curriculum modules and educator training materials." },
+                            { id: 11, name: "Parallel Drafting: Ages 12-18 (D8, D9)", start: "2026-04-11", end: "2026-05-20", owner: ["Michael", "Luis"], details: "Drafting of Ages 12-18 curriculum modules and educator training materials." },
+                            { id: 12, name: "Integrated Internal Review Cycle", start: "2026-05-21", end: "2026-05-28", owner: ["Full Team"], details: "Kathy reviews for developmental appropriateness. Iish reviews for teacher usability." },
+                            { id: 17, name: "Complete Family Engagement Strategy", start: "2026-04-01", end: "2026-04-30", owner: ["Michael", "Luis"], details: "Finalize outline, content samples, and alignment checkpoints for family outreach." },
+                            { id: 18, name: "End-of-Year Summary (Draft)", start: "2026-05-01", end: "2026-05-31", owner: ["Michael"], details: "Develop slide deck and 2-3 page narrative for OSH spring briefing." }
                         ]
                     },
                     {
                         name: "Phase 4: Finalization, Feedback Integration, & Delivery",
                         id: "phase4",
                         description: "Objective: To exclusively focus on incorporating CDPH feedback and delivering a polished, comprehensive final package.",
-                        timeframe: "June 1, 2026 – June 30, 2026",
+                        timeframe: "June 1, 2026 - June 30, 2026",
                         color: 'bg-amber-500',
                         tasks: [
                             { id: 13, name: "CDPH Feedback Integration", start: "2026-06-01", end: "2026-06-20", owner: ["Michael", "Luis"], details: "Systematically address all feedback from CDPH on D4-D9." },
-                            { id: 14, name: "Final Package Assembly & Formatting", start: "2026-06-21", end: "2026-06-27", owner: ["Michael", "Luis"], details: "Assemble all revised components into a single, cohesive package." },
-                            { id: 15, name: "Final Transmittal to CDPH (D10)", start: "2026-06-28", end: "2026-06-30", owner: ["Michael"], details: "Submit clean and tracked-changes versions as required by contract." }
+                            { id: 14, name: "End-of-Year Summary Submission Window", start: "2026-06-01", end: "2026-06-15", owner: ["Michael"], details: "Route End-of-Year Summary to Erin -> Ryan/CDPH OSH for sign-off and distribution." },
+                            { id: 15, name: "Final Package Assembly & Formatting", start: "2026-06-21", end: "2026-06-27", owner: ["Michael", "Luis"], details: "Assemble all revised components into a single, cohesive package." },
+                            { id: 19, name: "Final Transmittal to CDPH (D10)", start: "2026-06-28", end: "2026-06-30", owner: ["Michael"], details: "Submit clean and tracked-changes versions as required by contract." }
+                        ],
+                        checklist: [
+                            { id: 'clean-package', label: 'Clean + tracked versions packaged' },
+                            { id: 'spec-adherence', label: 'Package structure adheres to CDE-modeled spec' },
+                            { id: 'transmission-proof', label: 'Transmission to OSH includes "use in perpetuity" acknowledgement + archive format (ZIP + manifest)' },
+                            { id: 'comms-ready', label: 'Co-branded comms assets approved to send' }
                         ]
                     }
                 ],
                 raciData: [
-                    { id: 'D1', deliverable: 'Landscape Analysis & Lit Review', dueDate: { type: 'date', value: '2026-02-28' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Kathy D.', 'Iish R.'], I: ['Joe B.'] },
-                    { id: 'D2', deliverable: '[FINAL] Landscape Analysis', dueDate: { type: 'text', value: '2 wks post-feedback' }, R: ['Luis C.'], A: ['Michael C.'], C: ['CDPH'], I: [] },
-                    { id: 'D3', deliverable: 'Detailed Curriculum Outline', dueDate: { type: 'date', value: '2026-03-30' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Iish R.', 'Kathy D.'], I: ['Joe B.'] },
-                    { id: 'D4', deliverable: 'Curriculum: Grades TK-5', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.'], A: ['Michael C.'], C: ['Kathy D.'], I: ['Luis C.'] },
-                    { id: 'D5', deliverable: 'Training Materials: Grades TK-5', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.'], A: ['Michael C.'], C: ['Iish R.'], I: ['Luis C.'] },
-                    { id: 'D6', deliverable: 'Curriculum: Grades 6-8', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Kathy D.'], I: ['Michael C.'] },
-                    { id: 'D7', deliverable: 'Training Materials: Grades 6-8', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Iish R.'], I: ['Michael C.'] },
-                    { id: 'D8', deliverable: 'Curriculum: Grades 9-12', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Kathy D.'], I: [] },
-                    { id: 'D9', deliverable: 'Training Materials: Grades 9-12', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Iish R.'], I: [] },
-                    { id: 'D10', deliverable: '[FINAL] Complete K-12 Package', dueDate: { type: 'date', value: '2026-06-30' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Joe B.', 'CDPH'], I: [] },
-                    { id: 'D11', deliverable: 'Co-Branded Comms Materials', dueDate: { type: 'text', value: 'Ongoing' }, R: ['Geneva S.'], A: ['Michael C.'], C: ['Iish R.'], I: ['Full Team'] },
+                    { id: 'D1', deliverable: '[DRAFT] Landscape Analysis & Literature Review', dueDate: { type: 'date', value: '2026-02-28' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Kathy D.', 'Iish R.'], I: ['Joe B.'], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Internal only' },
+                    { id: 'D2', deliverable: '[FINAL] Landscape Analysis & Literature Review', dueDate: { type: 'date', value: '2026-03-15' }, R: ['Luis C.'], A: ['Michael C.'], C: ['CDPH'], I: [], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Shareable draft' },
+                    { id: 'D3', deliverable: 'Detailed Curriculum Outline (All Age Bands)', dueDate: { type: 'date', value: '2026-03-30' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Iish R.', 'Kathy D.'], I: ['Joe B.'], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Shareable draft' },
+                    { id: 'D4', deliverable: '[DRAFT] Curriculum Compendium - Ages 0-5', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.'], A: ['Michael C.'], C: ['Kathy D.'], I: ['Luis C.'], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Internal only' },
+                    { id: 'D5', deliverable: '[DRAFT] Training Materials - Ages 0-5', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.'], A: ['Michael C.'], C: ['Iish R.'], I: ['Luis C.'], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Internal only' },
+                    { id: 'D6', deliverable: '[DRAFT] Curriculum Compendium - Ages 5-11', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Kathy D.'], I: ['Michael C.'], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Internal only' },
+                    { id: 'D7', deliverable: '[DRAFT] Training Materials - Ages 5-11', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Iish R.'], I: ['Michael C.'], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Internal only' },
+                    { id: 'D8', deliverable: '[DRAFT] Curriculum Compendium - Ages 12-18', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Kathy D.'], I: [], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Internal only' },
+                    { id: 'D9', deliverable: '[DRAFT] Training Materials - Ages 12-18', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Iish R.'], I: [], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Internal only' },
+                    { id: 'D10', deliverable: '[FINAL] Complete K-12 Digital Citizenship Package (Modeled after CDE Ethnic Studies)', dueDate: { type: 'date', value: '2026-06-30' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Joe B.', 'CDPH'], I: [], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Final' },
+                    { id: 'D11', deliverable: 'Co-Branded Presentation & Communications Materials', dueDate: { type: 'text', value: 'Ongoing as needed' }, R: ['Geneva S.'], A: ['Michael C.'], C: ['Iish R.'], I: ['Full Team'], reviewRoute: 'Erin -> Ryan/CDPH OSH', shareStatus: 'Shareable draft' },
+                ],
+                metrics: {
+                    trainings: 0,
+                    downloads: 0,
+                    handouts: 0,
+                    comms: 0,
+                    webinar_reg: 0,
+                    webinar_attend: 0
+                },
+                nextTouchpoint: {
+                    date: '2026-04-10',
+                    focus: 'Curriculum Outline Review with OSH'
+                },
+                dissemination: [
+                    { id: 'press', label: 'Press/announcement copy', channel: 'Press release', approved: false, notes: '' },
+                    { id: 'newsletter', label: 'Newsletter blurb', channel: 'Newsletter', approved: false, notes: '' },
+                    { id: 'webinar', label: 'Webinar descriptions', channel: 'Webinar', approved: false, notes: '' },
+                    { id: 'partner-email', label: 'Partner email copy', channel: 'Partner email', approved: false, notes: '' },
+                    { id: 'listserv', label: 'Listserv posts', channel: 'Listserv', approved: false, notes: '' }
                 ]
             };
+
+            const formatTouchpointDate = (value) => {
+                if (!value) {
+                    return 'Date TBD';
+                }
+                const parsed = new Date(value);
+                if (Number.isNaN(parsed.getTime())) {
+                    return 'Date TBD';
+                }
+                return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            };
+
+            const touchpointSummary = document.getElementById('touchpointSummary');
+            const touchpointDateInput = document.getElementById('touchpointDate');
+            const touchpointFocusInput = document.getElementById('touchpointFocus');
+
+            const updateTouchpointSummary = () => {
+                if (!touchpointSummary) {
+                    return;
+                }
+                const { date, focus } = projectData.nextTouchpoint;
+                const dateText = formatTouchpointDate(date);
+                const focusText = focus && focus.trim().length ? focus.trim() : 'Focus TBD';
+                touchpointSummary.textContent = `${dateText} - ${focusText}`;
+            };
+
+            if (touchpointDateInput) {
+                touchpointDateInput.value = projectData.nextTouchpoint.date;
+                touchpointDateInput.addEventListener('change', () => {
+                    projectData.nextTouchpoint.date = touchpointDateInput.value;
+                    updateTouchpointSummary();
+                });
+            }
+
+            if (touchpointFocusInput) {
+                touchpointFocusInput.value = projectData.nextTouchpoint.focus;
+                touchpointFocusInput.addEventListener('input', () => {
+                    projectData.nextTouchpoint.focus = touchpointFocusInput.value;
+                    updateTouchpointSummary();
+                });
+            }
+
+            updateTouchpointSummary();
 
             const escapeHTML = (value = '') => String(value)
                 .replace(/&/g, '&amp;')
@@ -771,6 +930,13 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+
+            const escapeSelector = (value = '') => {
+                if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                    return CSS.escape(value);
+                }
+                return String(value).replace(/([\.#:[\],])/g, '\\$1');
+            };
 
             // Workload Chart
             const workloadCtx = document.getElementById('workloadChart').getContext('2d');
@@ -1107,6 +1273,18 @@
                                 <ul class="list-disc pl-5 space-y-2 text-sm">
                                     ${phaseTasks.map(task => `<li><strong>${task.name} (DRI: ${task.owner.join(', ')}):</strong> <span class="text-slate-500">${task.details}</span></li>`).join('')}
                                 </ul>
+                                ${Array.isArray(phase.checklist) && phase.checklist.length ? `<details${phase.id === 'phase4' ? ' id="final-package-checklist"' : ''} class="mt-4 bg-slate-50 border border-slate-200 rounded-md p-4">
+                                        <summary class="font-semibold text-slate-700 cursor-pointer">Final Handoff Requirements</summary>
+                                        <ul class="mt-3 space-y-2">
+                                            ${phase.checklist.map((item, index) => {
+                                                const checkboxId = `${phase.id}-check-${item.id || index}`;
+                                                return `<li class="flex items-center gap-3">
+                                                    <input type="checkbox" id="${checkboxId}" class="h-4 w-4 text-sky-600 border-slate-300 rounded">
+                                                    <label for="${checkboxId}" class="text-sm text-slate-600">${escapeHTML(item.label)}</label>
+                                                </li>`;
+                                            }).join('')}
+                                        </ul>
+                                    </details>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1130,6 +1308,131 @@
                 });
             });
             
+            // Monthly Reporting Dashboard
+            const metricsContainer = document.getElementById('metrics-dashboard');
+            const metricDefinitions = [
+                { key: 'trainings', label: 'Trainings delivered', hint: 'Workshops, PD sessions, webinars with facilitation.' },
+                { key: 'downloads', label: 'Lesson/resource downloads', hint: 'Curriculum files pulled from the shared drive.' },
+                { key: 'handouts', label: 'Handouts distributed', hint: 'Family one-pagers, classroom posters, quick guides.' },
+                { key: 'comms', label: 'Communications sends', hint: 'Listserv pushes, newsletters, outbound briefings.' },
+                { key: 'webinar_reg', label: 'Webinar registrations', hint: 'Sign-ups captured via RSVP forms.' },
+                { key: 'webinar_attend', label: 'Webinar attendance', hint: 'Live attendees across all sessions.' }
+            ];
+
+            if (metricsContainer) {
+                metricsContainer.innerHTML = metricDefinitions.map(definition => `
+                    <div class="border border-slate-200 rounded-md p-4 shadow-sm space-y-3">
+                        <div>
+                            <p class="font-semibold text-slate-800">${escapeHTML(definition.label)}</p>
+                            <p class="text-xs text-slate-500">${escapeHTML(definition.hint)}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="px-3 py-1 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-100" data-action="decrement" data-metric="${definition.key}" aria-label="Decrease ${escapeHTML(definition.label)}">-</button>
+                            <input type="number" min="0" class="metric-input border border-slate-300 rounded-md px-2 py-1 w-20 text-center" data-metric-value="${definition.key}" value="${escapeHTML(String(projectData.metrics[definition.key] ?? 0))}">
+                            <button type="button" class="px-3 py-1 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-100" data-action="increment" data-metric="${definition.key}" aria-label="Increase ${escapeHTML(definition.label)}">+</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                const adjustMetric = (key, delta) => {
+                    const current = Number(projectData.metrics[key]) || 0;
+                    const next = Math.max(0, current + delta);
+                    projectData.metrics[key] = next;
+                    const input = metricsContainer.querySelector(`input[data-metric-value="${key}"]`);
+                    if (input) {
+                        input.value = String(next);
+                    }
+                };
+
+                metricsContainer.addEventListener('click', (event) => {
+                    const button = event.target.closest('[data-action][data-metric]');
+                    if (!button) {
+                        return;
+                    }
+                    const { metric, action } = button.dataset;
+                    const delta = action === 'increment' ? 1 : -1;
+                    adjustMetric(metric, delta);
+                });
+
+                metricsContainer.addEventListener('input', (event) => {
+                    const input = event.target.closest('input[data-metric-value]');
+                    if (!input) {
+                        return;
+                    }
+                    const { metricValue } = input.dataset;
+                    let value = parseInt(input.value, 10);
+                    if (Number.isNaN(value) || value < 0) {
+                        value = 0;
+                    }
+                    projectData.metrics[metricValue] = value;
+                    input.value = String(value);
+                });
+            }
+
+            // Dissemination Workbench
+            const disseminationContainer = document.getElementById('dissemination-grid');
+            const disseminationChannels = ['Press release', 'Newsletter', 'Webinar', 'Partner email', 'Listserv', 'Social media'];
+
+            if (disseminationContainer) {
+                disseminationContainer.innerHTML = projectData.dissemination.map(item => `
+                    <div class="border border-slate-200 rounded-md p-4 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="font-semibold text-slate-800">${escapeHTML(item.label)}</h4>
+                            <label class="flex items-center gap-2 text-sm text-slate-600">
+                                <input type="checkbox" class="h-4 w-4 text-sky-600 border-slate-300 rounded dissemination-approve" data-id="${escapeHTML(item.id)}" ${item.approved ? 'checked' : ''}>
+                                <span data-status-label="${escapeHTML(item.id)}">${item.approved ? 'Approved to send' : 'Needs approval'}</span>
+                            </label>
+                        </div>
+                        <div class="space-y-3 text-sm text-slate-600">
+                            <label class="flex flex-col gap-1">
+                                <span class="text-xs uppercase tracking-wide text-slate-500">Channel</span>
+                                <select class="border border-slate-300 rounded-md px-2 py-1 dissemination-channel" data-id="${escapeHTML(item.id)}">
+                                    ${disseminationChannels.map(channel => `<option value="${escapeHTML(channel)}" ${item.channel === channel ? 'selected' : ''}>${escapeHTML(channel)}</option>`).join('')}
+                                </select>
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-xs uppercase tracking-wide text-slate-500">Notes / next steps</span>
+                                <textarea class="border border-slate-300 rounded-md px-2 py-1 dissemination-notes" data-id="${escapeHTML(item.id)}" style="min-height: 80px;">${escapeHTML(item.notes || '')}</textarea>
+                            </label>
+                        </div>
+                    </div>
+                `).join('');
+
+                disseminationContainer.addEventListener('change', (event) => {
+                    const approveToggle = event.target.closest('.dissemination-approve');
+                    if (approveToggle) {
+                        const item = projectData.dissemination.find(entry => entry.id === approveToggle.dataset.id);
+                        if (item) {
+                            item.approved = approveToggle.checked;
+                            const statusLabel = disseminationContainer.querySelector(`[data-status-label="${escapeSelector(approveToggle.dataset.id)}"]`);
+                            if (statusLabel) {
+                                statusLabel.textContent = item.approved ? 'Approved to send' : 'Needs approval';
+                            }
+                        }
+                        return;
+                    }
+
+                    const channelSelect = event.target.closest('.dissemination-channel');
+                    if (channelSelect) {
+                        const item = projectData.dissemination.find(entry => entry.id === channelSelect.dataset.id);
+                        if (item) {
+                            item.channel = channelSelect.value;
+                        }
+                    }
+                });
+
+                disseminationContainer.addEventListener('input', (event) => {
+                    const notesField = event.target.closest('.dissemination-notes');
+                    if (!notesField) {
+                        return;
+                    }
+                    const item = projectData.dissemination.find(entry => entry.id === notesField.dataset.id);
+                    if (item) {
+                        item.notes = notesField.value;
+                    }
+                });
+            }
+
             // RACI Table
             const raciTable = document.getElementById('raci-table');
             const basePeople = ['Luis C.', 'Michael C.', 'Kathy D.', 'Iish R.', 'Joe B.', 'Geneva S.', 'CDPH', 'Full Team'];
@@ -1245,13 +1548,15 @@
 
             const renderRaciTable = () => {
                 let raciHTML = `<thead><tr class="bg-slate-50">
-                    <th class="whitespace-nowrap" style="width: 8%;">ID<div class="raci-table-resizer" data-column="0"></div></th>
-                    <th class="text-wrap" style="width: 35%;">Deliverable<div class="raci-table-resizer" data-column="1"></div></th>
-                    <th class="whitespace-nowrap" style="width: 12%;">Due Date<div class="raci-table-resizer" data-column="2"></div></th>
-                    <th style="width: 11.25%;">R<div class="raci-table-resizer" data-column="3"></div></th>
-                    <th style="width: 11.25%;">A<div class="raci-table-resizer" data-column="4"></div></th>
-                    <th style="width: 11.25%;">C<div class="raci-table-resizer" data-column="5"></div></th>
-                    <th style="width: 11.25%;">I</th>
+                    <th class="whitespace-nowrap" style="width: 7%;">ID<div class="raci-table-resizer" data-column="0"></div></th>
+                    <th class="text-wrap" style="width: 30%;">Deliverable<div class="raci-table-resizer" data-column="1"></div></th>
+                    <th class="whitespace-nowrap" style="width: 11%;">Due Date<div class="raci-table-resizer" data-column="2"></div></th>
+                    <th class="text-wrap" style="width: 16%;">Review Owner / Route<div class="raci-table-resizer" data-column="3"></div></th>
+                    <th class="whitespace-nowrap" style="width: 9%;">External Share?<div class="raci-table-resizer" data-column="4"></div></th>
+                    <th style="width: 9%;">R<div class="raci-table-resizer" data-column="5"></div></th>
+                    <th style="width: 9%;">A<div class="raci-table-resizer" data-column="6"></div></th>
+                    <th style="width: 9%;">C<div class="raci-table-resizer" data-column="7"></div></th>
+                    <th style="width: 9%;">I</th>
                 </tr></thead><tbody>`;
 
                 const rows = projectData.raciData
@@ -1259,7 +1564,7 @@
                     .filter(({ item }) => !isRaciLocked || ((item.deliverable || '').trim().length > 0));
 
                 if (!rows.length) {
-                    raciHTML += '<tr><td colspan="7" class="py-4 text-center text-slate-500">No deliverables to display.</td></tr>';
+                    raciHTML += '<tr><td colspan="9" class="py-4 text-center text-slate-500">No deliverables to display.</td></tr>';
                 } else {
                     rows.forEach(({ item, index }) => {
                         if (isRaciLocked) {
@@ -1268,6 +1573,8 @@
                                     <td class="whitespace-nowrap">${formatDisplayValue(item.id)}</td>
                                     <td class="text-wrap">${formatDisplayValue(item.deliverable, { placeholder: 'No description', preserveWhitespace: true })}</td>
                                     ${createDueDateCellReadOnly(item.dueDate)}
+                                    <td class="text-wrap">${formatDisplayValue(item.reviewRoute, { placeholder: 'Route TBD', preserveWhitespace: true })}</td>
+                                    <td class="whitespace-nowrap">${formatDisplayValue(item.shareStatus, { placeholder: 'Internal only' })}</td>
                                     ${createRoleCellReadOnly(item.R)}
                                     ${createRoleCellReadOnly(item.A)}
                                     ${createRoleCellReadOnly(item.C)}
@@ -1280,6 +1587,12 @@
                                     <td><input type="text" class="editable-input" data-field="id" value="${escapeHTML(item.id || '')}" placeholder="e.g. D12"></td>
                                     <td><textarea class="editable-textarea text-wrap" rows="2" data-field="deliverable" placeholder="Describe the deliverable">${escapeHTML(item.deliverable || '')}</textarea></td>
                                     ${createDueDateCellEditable(item.dueDate || { type: 'date', value: '' })}
+                                    <td><input type="text" class="editable-input" data-field="reviewRoute" placeholder="e.g. Erin -> Ryan/CDPH OSH" value="${escapeHTML(item.reviewRoute || '')}"></td>
+                                    <td>
+                                        <select class="editable-select" data-field="shareStatus">
+                                            ${['Internal only', 'Shareable draft', 'Final'].map(option => `<option value="${escapeHTML(option)}" ${item.shareStatus === option ? 'selected' : ''}>${escapeHTML(option)}</option>`).join('')}
+                                        </select>
+                                    </td>
                                     ${createRoleCellEditable('R', item.R, index)}
                                     ${createRoleCellEditable('A', item.A, index)}
                                     ${createRoleCellEditable('C', item.C, index)}
@@ -1369,6 +1682,10 @@
                     projectData.raciData[index][field] = target.value;
                 }
 
+                if (field === 'reviewRoute') {
+                    projectData.raciData[index].reviewRoute = target.value;
+                }
+
                 if (field === 'dueDateDate') {
                     projectData.raciData[index].dueDate.value = target.value;
                     const preview = row.querySelector('[data-preview="dueDate"]');
@@ -1402,6 +1719,12 @@
                     if (target.value === 'text' && !projectData.raciData[index].dueDate.value) {
                         projectData.raciData[index].dueDate.value = '';
                     }
+                    renderRaciTable();
+                    return;
+                }
+
+                if (field === 'shareStatus') {
+                    projectData.raciData[index].shareStatus = target.value;
                     renderRaciTable();
                     return;
                 }
@@ -1510,6 +1833,8 @@
                             id: '',
                             deliverable: '',
                             dueDate: { type: 'date', value: '' },
+                            reviewRoute: 'Erin -> Ryan/CDPH OSH',
+                            shareStatus: 'Internal only',
                             R: [],
                             A: [],
                             C: [],
@@ -1575,4 +1900,3 @@
     </script>
 </body>
 </html>
-
