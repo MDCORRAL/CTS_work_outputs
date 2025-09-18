@@ -14,21 +14,21 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
+            background-color: #F7FAFC; /* UCLA Light Gray */
         }
         .gantt-grid {
             display: grid;
             grid-template-columns: 150px repeat(11, 1fr); /* Adjusted for new date range */
             gap: 1px;
-            background-color: #e2e8f0; /* slate-200 */
+            background-color: #718096; /* UCLA Medium Gray */
         }
         .gantt-header {
-            background-color: #f1f5f9; /* slate-100 */
+            background-color: #F7FAFC; /* UCLA Light Gray */
             padding: 0.5rem;
             text-align: center;
             font-size: 0.75rem;
             font-weight: 600;
-            color: #475569; /* slate-600 */
+            color: #2D3748; /* UCLA Dark Gray */
             position: -webkit-sticky; /* Safari support */
             position: sticky;
             top: 0;
@@ -59,7 +59,7 @@
             width: 0.25rem;
             height: 60%;
             border-radius: 9999px;
-            background-color: #cbd5f5;
+            background-color: #8BB8E8; /* UCLA Lighter Blue */
         }
         .timeline-unlocked .gantt-header-handle {
             display: flex;
@@ -72,7 +72,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #718096; /* UCLA Medium Gray */
             position: -webkit-sticky; /* Safari support */
             position: sticky;
             left: 0;
@@ -83,14 +83,14 @@
         }
         .gantt-cell {
             background-color: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #718096; /* UCLA Medium Gray */
             position: relative;
         }
         .gantt-bar {
             position: absolute;
             height: 75%;
             top: 12.5%;
-            background-color: #38bdf8; /* sky-400 */
+            background-color: #2774AE; /* UCLA Blue */
             border-radius: 0.25rem;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
@@ -108,10 +108,100 @@
         .modal-content {
             transition: transform 0.3s ease;
         }
+        .raci-table {
+            table-layout: fixed;
+            width: 100%;
+        }
         .raci-table th, .raci-table td {
             padding: 0.75rem;
             text-align: left;
-            border-bottom: 1px solid #e2e8f0; /* slate-200 */
+            border-bottom: 1px solid #718096; /* UCLA Medium Gray */
+            position: relative;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-wrap: break-word;
+        }
+        .raci-table th {
+            background-color: #F7FAFC; /* UCLA Light Gray */
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .raci-table-resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
+            cursor: col-resize;
+            background-color: transparent;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .raci-table-resizer:hover,
+        .raci-table-resizer.active {
+            opacity: 1;
+            background-color: #8BB8E8; /* UCLA Lighter Blue */
+        }
+        .raci-table th:hover .raci-table-resizer {
+            opacity: 1;
+            background-color: #8BB8E8; /* UCLA Lighter Blue */
+        }
+        .text-wrap {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(45, 55, 72, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .password-modal {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+        .password-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #8BB8E8;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            color: #2D3748;
+            background-color: #F7FAFC;
+        }
+        .password-input:focus {
+            outline: none;
+            border-color: #2774AE;
+            box-shadow: 0 0 0 3px rgba(39, 116, 174, 0.25);
+        }
+        .password-button {
+            background-color: #2774AE;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .password-button:hover {
+            background-color: #1A5490;
+        }
+        .locked-table {
+            filter: blur(5px);
+            pointer-events: none;
         }
         .raci-key {
             display: inline-block;
@@ -125,20 +215,25 @@
         .editable-select,
         .editable-textarea {
             width: 100%;
-            border: 1px solid #cbd5f5;
+            border: 1px solid #8BB8E8; /* UCLA Lighter Blue */
             border-radius: 0.375rem;
             padding: 0.5rem;
             font-size: 0.875rem;
-            color: #1e293b;
-            background-color: #f8fafc;
+            color: #2D3748; /* UCLA Dark Gray */
+            background-color: #F7FAFC; /* UCLA Light Gray */
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .editable-textarea {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         .editable-input:focus,
         .editable-select:focus,
         .editable-textarea:focus {
             outline: none;
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+            border-color: #2774AE; /* UCLA Blue */
+            box-shadow: 0 0 0 3px rgba(39, 116, 174, 0.25); /* UCLA Blue with opacity */
             background-color: #ffffff;
         }
         .editable-select[multiple] {
@@ -151,34 +246,34 @@
             padding: 0.5rem 0.75rem;
             border-radius: 0.5rem;
             font-weight: 600;
-            background-color: #0ea5e9;
+            background-color: #2774AE; /* UCLA Blue */
             color: white;
             transition: background-color 0.2s ease;
         }
         .table-control-button:hover {
-            background-color: #0284c7;
+            background-color: #1A5490; /* UCLA Darker Blue */
         }
         .table-control-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            background-color: #7dd3fc;
+            background-color: #8BB8E8; /* UCLA Lighter Blue */
         }
         .table-control-button--secondary {
-            background-color: #64748b;
+            background-color: #718096; /* UCLA Medium Gray */
         }
         .table-control-button--secondary:hover {
-            background-color: #475569;
+            background-color: #2D3748; /* UCLA Dark Gray */
         }
         .table-control-button--secondary.table-control-button--active {
-            background-color: #334155;
+            background-color: #2D3748; /* UCLA Dark Gray */
         }
         .table-control-button--secondary.table-control-button--active:hover {
-            background-color: #1e293b;
+            background-color: #2D3748; /* UCLA Dark Gray */
         }
         .table-inline-action {
             font-size: 0.75rem;
             font-weight: 600;
-            color: #0284c7;
+            color: #2774AE; /* UCLA Blue */
             cursor: pointer;
         }
         .table-inline-action:hover {
@@ -186,28 +281,33 @@
         }
         .timeline-textarea {
             width: 100%;
-            border: 1px solid #cbd5f5;
+            border: 1px solid #8BB8E8; /* UCLA Lighter Blue */
             border-radius: 0.375rem;
             padding: 0.5rem;
             font-size: 0.75rem;
-            color: #1e293b;
-            background-color: #f8fafc;
+            color: #2D3748; /* UCLA Dark Gray */
+            background-color: #F7FAFC; /* UCLA Light Gray */
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
             resize: vertical;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         .timeline-textarea:focus {
             outline: none;
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+            border-color: #2774AE; /* UCLA Blue */
+            box-shadow: 0 0 0 3px rgba(39, 116, 174, 0.25); /* UCLA Blue with opacity */
             background-color: #ffffff;
         }
         .gantt-task-name--editable {
-            white-space: normal;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             overflow: visible;
         }
         .gantt-cell--editing {
             padding: 0.25rem;
-            background-color: #f8fafc;
+            background-color: #F7FAFC; /* UCLA Light Gray */
         }
         .timeline-cell-editor-container {
             display: flex;
@@ -225,11 +325,11 @@
         }
         .timeline-boundary-input {
             width: 100%;
-            border: 1px solid #cbd5f5;
+            border: 1px solid #8BB8E8; /* UCLA Lighter Blue */
             border-radius: 0.375rem;
             padding: 0.35rem 0.5rem;
             font-size: 0.75rem;
-            color: #1e293b;
+            color: #2D3748; /* UCLA Dark Gray */
             background-color: #ffffff;
         }
     </style>
@@ -313,7 +413,7 @@
         <section id="timeline" class="mb-12">
             <h2 class="text-2xl font-bold text-slate-800 mb-4">II. Project Timeline</h2>
             <p class="text-slate-600 mb-6 max-w-4xl">This is the detailed, execution-focused roadmap for the project. The interactive timeline below provides a visual overview of the major tasks and phases. Click on any task bar to view more details.</p>
-            <div class="bg-white rounded-lg shadow-lg">
+            <div class="bg-white rounded-lg shadow-lg timeline-container">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 border-b border-slate-200 text-sm">
                     <p class="text-slate-600">Switch between review and edit modes to adjust task timing notes inline.</p>
                     <div class="flex items-center gap-2">
@@ -399,7 +499,7 @@
         <section id="raci" class="mb-12">
             <h2 class="text-2xl font-bold text-slate-800 mb-4">V. Key Deliverables Schedule & RACI Matrix</h2>
             <p class="text-slate-600 mb-6 max-w-4xl">This table provides a comprehensive overview of all contractual deliverables and clarifies team roles for each, ensuring clear ownership and accountability.</p>
-            <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+            <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto raci-container">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 text-sm">
                     <p class="text-slate-600">Use the controls to update deliverables, change assignments, or add new scope items in real time.</p>
                     <div class="flex flex-wrap items-center justify-end gap-2">
@@ -444,8 +544,68 @@
         </div>
     </div>
 
+    <!-- Password Protection Overlay -->
+    <div id="passwordOverlay" class="password-overlay">
+        <div class="password-modal">
+            <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Enter Password</h3>
+            <p class="text-slate-600 mb-4 text-center">Please enter the password to access the tables.</p>
+            <div class="space-y-4">
+                <input type="password" id="passwordInput" class="password-input" placeholder="Enter password" autocomplete="off">
+                <div class="flex justify-center">
+                    <button id="passwordSubmit" class="password-button">Unlock Tables</button>
+                </div>
+                <p id="passwordError" class="text-red-500 text-sm text-center hidden">Incorrect password. Please try again.</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Password Protection
+            const CORRECT_PASSWORD = '123';
+            let isAuthenticated = false;
+            const passwordOverlay = document.getElementById('passwordOverlay');
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordSubmit = document.getElementById('passwordSubmit');
+            const passwordError = document.getElementById('passwordError');
+            const timelineContainer = document.querySelector('.timeline-container');
+            const raciContainer = document.querySelector('.raci-container');
+
+            const lockTables = () => {
+                if (timelineContainer) timelineContainer.classList.add('locked-table');
+                if (raciContainer) raciContainer.classList.add('locked-table');
+                passwordOverlay.style.display = 'flex';
+            };
+
+            const unlockTables = () => {
+                if (timelineContainer) timelineContainer.classList.remove('locked-table');
+                if (raciContainer) raciContainer.classList.remove('locked-table');
+                passwordOverlay.style.display = 'none';
+                isAuthenticated = true;
+            };
+
+            const checkPassword = () => {
+                const enteredPassword = passwordInput.value;
+                if (enteredPassword === CORRECT_PASSWORD) {
+                    unlockTables();
+                    passwordError.classList.add('hidden');
+                    passwordInput.value = '';
+                } else {
+                    passwordError.classList.remove('hidden');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            };
+
+            passwordSubmit.addEventListener('click', checkPassword);
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+
+            // Initialize with locked tables
+            lockTables();
             const projectData = {
                 team: [
                     { name: "Core Execution (Michael & Luis)", workload: 75, color: '#0ea5e9' },
@@ -997,7 +1157,15 @@
             };
 
             const renderRaciTable = () => {
-                let raciHTML = `<thead><tr class="bg-slate-50"><th class="whitespace-nowrap">ID</th><th>Deliverable</th><th class="whitespace-nowrap">Due Date</th><th>R</th><th>A</th><th>C</th><th>I</th></tr></thead><tbody>`;
+                let raciHTML = `<thead><tr class="bg-slate-50">
+                    <th class="whitespace-nowrap" style="width: 8%;">ID<div class="raci-table-resizer" data-column="0"></div></th>
+                    <th class="text-wrap" style="width: 35%;">Deliverable<div class="raci-table-resizer" data-column="1"></div></th>
+                    <th class="whitespace-nowrap" style="width: 12%;">Due Date<div class="raci-table-resizer" data-column="2"></div></th>
+                    <th style="width: 11.25%;">R<div class="raci-table-resizer" data-column="3"></div></th>
+                    <th style="width: 11.25%;">A<div class="raci-table-resizer" data-column="4"></div></th>
+                    <th style="width: 11.25%;">C<div class="raci-table-resizer" data-column="5"></div></th>
+                    <th style="width: 11.25%;">I</th>
+                </tr></thead><tbody>`;
 
                 const rows = projectData.raciData
                     .map((item, index) => ({ item, index }))
@@ -1011,7 +1179,7 @@
                             raciHTML += `
                                 <tr data-index="${index}">
                                     <td class="whitespace-nowrap">${formatDisplayValue(item.id)}</td>
-                                    <td>${formatDisplayValue(item.deliverable, { placeholder: 'No description', preserveWhitespace: true })}</td>
+                                    <td class="text-wrap">${formatDisplayValue(item.deliverable, { placeholder: 'No description', preserveWhitespace: true })}</td>
                                     ${createDueDateCellReadOnly(item.dueDate)}
                                     ${createRoleCellReadOnly(item.R)}
                                     ${createRoleCellReadOnly(item.A)}
@@ -1023,7 +1191,7 @@
                             raciHTML += `
                                 <tr data-index="${index}">
                                     <td><input type="text" class="editable-input" data-field="id" value="${escapeHTML(item.id || '')}" placeholder="e.g. D12"></td>
-                                    <td><textarea class="editable-textarea" rows="2" data-field="deliverable" placeholder="Describe the deliverable">${escapeHTML(item.deliverable || '')}</textarea></td>
+                                    <td><textarea class="editable-textarea text-wrap" rows="2" data-field="deliverable" placeholder="Describe the deliverable">${escapeHTML(item.deliverable || '')}</textarea></td>
                                     ${createDueDateCellEditable(item.dueDate || { type: 'date', value: '' })}
                                     ${createRoleCellEditable('R', item.R, index)}
                                     ${createRoleCellEditable('A', item.A, index)}
@@ -1037,6 +1205,41 @@
 
                 raciHTML += '</tbody>';
                 raciTable.innerHTML = raciHTML;
+
+                // Add resize functionality
+                const resizers = raciTable.querySelectorAll('.raci-table-resizer');
+                resizers.forEach(resizer => {
+                    let isResizing = false;
+                    let startX = 0;
+                    let startWidth = 0;
+                    let currentColumn = null;
+
+                    resizer.addEventListener('mousedown', (e) => {
+                        isResizing = true;
+                        startX = e.clientX;
+                        currentColumn = resizer.parentElement;
+                        startWidth = parseInt(currentColumn.style.width || currentColumn.offsetWidth);
+                        resizer.classList.add('active');
+                        e.preventDefault();
+                    });
+
+                    document.addEventListener('mousemove', (e) => {
+                        if (!isResizing) return;
+                        const diff = e.clientX - startX;
+                        const newWidth = Math.max(50, startWidth + diff);
+                        if (currentColumn) {
+                            currentColumn.style.width = newWidth + 'px';
+                        }
+                    });
+
+                    document.addEventListener('mouseup', () => {
+                        if (isResizing) {
+                            isResizing = false;
+                            if (resizer) resizer.classList.remove('active');
+                            currentColumn = null;
+                        }
+                    });
+                });
             };
 
             renderRaciTable();
