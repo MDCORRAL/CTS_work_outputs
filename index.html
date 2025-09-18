@@ -1665,6 +1665,7 @@
                                     <button type="button" class="row-control-button" data-action="add-below" data-index="${index}">Row ↓</button>
                                     <button type="button" class="row-control-button" data-action="add-sub-above" data-index="${index}">Sub ↑</button>
                                     <button type="button" class="row-control-button" data-action="add-sub-below" data-index="${index}">Sub ↓</button>
+                                    <button type="button" class="row-control-button row-control-delete" data-action="delete-row" data-index="${index}">Delete</button>
                                 </div>
                             `;
                             raciHTML += `
@@ -1861,6 +1862,27 @@
                 }
             });
 
+            const focusRaciRow = (rowIndex) => {
+                if (rowIndex < 0) {
+                    return;
+                }
+                requestAnimationFrame(() => {
+                    const row = raciTable.querySelector(`tbody tr[data-index="${rowIndex}"]`);
+                    if (!row) {
+                        return;
+                    }
+                    const textarea = row.querySelector('textarea[data-field="deliverable"]');
+                    if (textarea) {
+                        textarea.focus();
+                        return;
+                    }
+                    const input = row.querySelector('input, select, textarea');
+                    if (input) {
+                        input.focus();
+                    }
+                });
+            };
+
             const insertRaciRow = (referenceIndex, { before = false, asSubRow = false } = {}) => {
                 const baseItem = projectData.raciData[referenceIndex];
                 if (!baseItem) {
@@ -1883,21 +1905,7 @@
                 const insertIndex = before ? referenceIndex : referenceIndex + 1;
                 projectData.raciData.splice(insertIndex, 0, newItem);
                 renderRaciTable();
-                requestAnimationFrame(() => {
-                    const newRow = raciTable.querySelector(`tbody tr[data-index="${insertIndex}"]`);
-                    if (!newRow) {
-                        return;
-                    }
-                    const textarea = newRow.querySelector('textarea[data-field="deliverable"]');
-                    if (textarea) {
-                        textarea.focus();
-                        return;
-                    }
-                    const input = newRow.querySelector('input, select, textarea');
-                    if (input) {
-                        input.focus();
-                    }
-                });
+                focusRaciRow(insertIndex);
             };
 
             raciTable.addEventListener('click', (event) => {
@@ -1926,6 +1934,18 @@
                     }
                     if (action === 'add-sub-below') {
                         insertRaciRow(index, { before: false, asSubRow: true });
+                        return;
+                    }
+                    if (action === 'delete-row') {
+                        if (!projectData.raciData[index]) {
+                            return;
+                        }
+                        projectData.raciData.splice(index, 1);
+                        renderRaciTable();
+                        const nextFocusIndex = Math.min(index, projectData.raciData.length - 1);
+                        if (nextFocusIndex >= 0) {
+                            focusRaciRow(nextFocusIndex);
+                        }
                         return;
                     }
                 }
