@@ -1251,6 +1251,7 @@
                                 <button type="button" class="timeline-row-action" data-action="add-below" data-task-id="${task.id}">Row ↓</button>
                                 <button type="button" class="timeline-row-action" data-action="add-sub-above" data-task-id="${task.id}">Sub ↑</button>
                                 <button type="button" class="timeline-row-action" data-action="add-sub-below" data-task-id="${task.id}">Sub ↓</button>
+                                <button type="button" class="timeline-row-action" data-action="delete" data-task-id="${task.id}">Delete</button>
                             </div>`;
                         ganttHTML += `
                             <div class="gantt-task-name gantt-task-name--editable" data-task-id="${task.id}">
@@ -1349,6 +1350,34 @@
                     return;
                 }
                 const { task, phase, index } = entry;
+
+                if (action === 'delete') {
+                    const tasks = phase.tasks;
+                    const baseIndent = Number(task.indentLevel) || 0;
+                    let removeCount = 1;
+                    for (let i = index + 1; i < tasks.length; i += 1) {
+                        const nextIndent = Number(tasks[i].indentLevel) || 0;
+                        if (nextIndent > baseIndent) {
+                            removeCount += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    tasks.splice(index, removeCount);
+                    renderTimeline();
+                    requestAnimationFrame(() => {
+                        const neighbor = phase.tasks[index] || phase.tasks[index - 1];
+                        if (neighbor) {
+                            const textarea = ganttContainer.querySelector(`textarea.timeline-textarea--name[data-task-id="${neighbor.id}"]`);
+                            if (textarea) {
+                                textarea.focus();
+                                textarea.select();
+                            }
+                        }
+                    });
+                    return;
+                }
+
                 const baseIndent = Number(task.indentLevel) || 0;
                 const asSubRow = action === 'add-sub-above' || action === 'add-sub-below';
                 const before = action === 'add-above' || action === 'add-sub-above';
