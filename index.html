@@ -251,11 +251,48 @@
             padding: 0.25rem 0.5rem;
             border-radius: 0.25rem;
             font-weight: 600;
-            color: var(--ucla-white);
             font-size: 0.75rem;
         }
-        .raci-key--dark {
+        .raci-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            color: var(--ucla-white);
+        }
+        .raci-chip__remove {
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 0.75rem;
+            padding: 0;
+        }
+        .raci-chip__remove:hover {
+            opacity: 0.8;
+        }
+        .raci-color--responsible {
+            background-color: var(--ucla-blue);
+            color: var(--ucla-white);
+        }
+        .raci-color--accountable {
+            background-color: var(--ucla-gold);
+            color: var(--ucla-dark-gray);
+        }
+        .raci-color--consulted {
+            background-color: var(--ucla-light-blue);
+            color: var(--ucla-dark-blue);
+        }
+        .raci-color--informed {
             background-color: var(--ucla-dark-gray);
+            color: var(--ucla-white);
         }
         .raci-deliverable-edit,
         .raci-deliverable-display {
@@ -691,10 +728,10 @@
                 </div>
                 <div class="flex items-center space-x-4 mb-4 text-sm">
                     <span class="font-bold">RACI Key:</span>
-                    <span><span class="raci-key raci-key--dark">R</span> = Responsible</span>
-                    <span><span class="raci-key raci-key--dark">A</span> = Accountable</span>
-                    <span><span class="raci-key raci-key--dark">C</span> = Consulted</span>
-                    <span><span class="raci-key raci-key--dark">I</span> = Informed</span>
+                    <span><span class="raci-key raci-color--responsible">R</span> = Responsible</span>
+                    <span><span class="raci-key raci-color--accountable">A</span> = Accountable</span>
+                    <span><span class="raci-key raci-color--consulted">C</span> = Consulted</span>
+                    <span><span class="raci-key raci-color--informed">I</span> = Informed</span>
                 </div>
                 <table id="raci-table" class="w-full text-sm raci-table"></table>
             </div>
@@ -1516,15 +1553,23 @@
                 return String(values).split(',').map(v => v.trim()).filter(Boolean);
             };
 
+            const raciRoleClassMap = {
+                R: 'raci-color--responsible',
+                A: 'raci-color--accountable',
+                C: 'raci-color--consulted',
+                I: 'raci-color--informed'
+            };
+
             const createRoleCellEditable = (role, values = [], index) => {
                 const normalizedValues = normalizeRoleValues(values);
                 const selectedValue = normalizedValues[0] || '';
                 const options = getAllPeople(normalizedValues);
+                const roleColorClass = raciRoleClassMap[role] || '';
                 const chipsHTML = normalizedValues.length
                     ? normalizedValues.map(person => `
-                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700" data-person="${escapeHTML(person)}">
+                            <span class="raci-chip ${roleColorClass}" data-person="${escapeHTML(person)}">
                                 <span>${escapeHTML(person)}</span>
-                                <button type="button" class="text-slate-500 hover:text-slate-700" data-action="remove-assignee" data-role="${role}" data-index="${index}" data-person="${escapeHTML(person)}" aria-label="Remove ${escapeHTML(person)} from ${role}">
+                                <button type="button" class="raci-chip__remove" data-action="remove-assignee" data-role="${role}" data-index="${index}" data-person="${escapeHTML(person)}" aria-label="Remove ${escapeHTML(person)} from ${role}">
                                     &times;
                                 </button>
                             </span>
@@ -1562,15 +1607,16 @@
                 return `<td class="whitespace-nowrap">${formatDisplayValue(display, { placeholder: 'Not set' })}</td>`;
             };
 
-            const createRoleCellReadOnly = (values = []) => {
+            const createRoleCellReadOnly = (role, values = []) => {
                 const normalizedValues = normalizeRoleValues(values);
+                const roleColorClass = raciRoleClassMap[role] || '';
                 if (!normalizedValues.length) {
                     return '<td><span class="text-slate-400 italic">—</span></td>';
                 }
                 return `
                     <td>
                         <ul class="space-y-1">
-                            ${normalizedValues.map(person => `<li>${escapeHTML(person)}</li>`).join('')}
+                            ${normalizedValues.map(person => `<li><span class="raci-chip ${roleColorClass}">${escapeHTML(person)}</span></li>`).join('')}
                         </ul>
                     </td>
                 `;
@@ -1583,10 +1629,10 @@
                     <th class="whitespace-nowrap" style="width: 11%;">Due Date<div class="raci-table-resizer" data-column="2"></div></th>
                     <th class="text-wrap" style="width: 16%;">Review Owner / Route<div class="raci-table-resizer" data-column="3"></div></th>
                     <th class="whitespace-nowrap" style="width: 9%;">External Share?<div class="raci-table-resizer" data-column="4"></div></th>
-                    <th style="width: 9%;"><span class="raci-key raci-key--dark">R</span><div class="raci-table-resizer" data-column="5"></div></th>
-                    <th style="width: 9%;"><span class="raci-key raci-key--dark">A</span><div class="raci-table-resizer" data-column="6"></div></th>
-                    <th style="width: 9%;"><span class="raci-key raci-key--dark">C</span><div class="raci-table-resizer" data-column="7"></div></th>
-                    <th style="width: 9%;"><span class="raci-key raci-key--dark">I</span></th>
+                    <th style="width: 9%;"><span class="raci-key raci-color--responsible">R</span><div class="raci-table-resizer" data-column="5"></div></th>
+                    <th style="width: 9%;"><span class="raci-key raci-color--accountable">A</span><div class="raci-table-resizer" data-column="6"></div></th>
+                    <th style="width: 9%;"><span class="raci-key raci-color--consulted">C</span><div class="raci-table-resizer" data-column="7"></div></th>
+                    <th style="width: 9%;"><span class="raci-key raci-color--informed">I</span></th>
                 </tr></thead><tbody>`;
 
                 const rows = projectData.raciData
@@ -1610,10 +1656,10 @@
                                     ${createDueDateCellReadOnly(item.dueDate)}
                                     <td class="text-wrap">${formatDisplayValue(item.reviewRoute, { placeholder: 'Route TBD', preserveWhitespace: true })}</td>
                                     <td class="whitespace-nowrap">${formatDisplayValue(item.shareStatus, { placeholder: 'Internal only' })}</td>
-                                    ${createRoleCellReadOnly(item.R)}
-                                    ${createRoleCellReadOnly(item.A)}
-                                    ${createRoleCellReadOnly(item.C)}
-                                    ${createRoleCellReadOnly(item.I)}
+                                    ${createRoleCellReadOnly('R', item.R)}
+                                    ${createRoleCellReadOnly('A', item.A)}
+                                    ${createRoleCellReadOnly('C', item.C)}
+                                    ${createRoleCellReadOnly('I', item.I)}
                                 </tr>
                             `;
                         } else {
