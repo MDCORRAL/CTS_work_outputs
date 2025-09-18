@@ -608,8 +608,18 @@
 
             const createRoleCellEditable = (role, values = [], index) => {
                 const normalizedValues = normalizeRoleValues(values);
+                const selectedValue = normalizedValues[0] || '';
                 const options = getAllPeople(normalizedValues);
-
+                const chipsHTML = normalizedValues.length
+                    ? normalizedValues.map(person => `
+                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700" data-person="${escapeHTML(person)}">
+                                <span>${escapeHTML(person)}</span>
+                                <button type="button" class="text-slate-500 hover:text-slate-700" data-action="remove-assignee" data-role="${role}" data-index="${index}" data-person="${escapeHTML(person)}" aria-label="Remove ${escapeHTML(person)} from ${role}">
+                                    &times;
+                                </button>
+                            </span>
+                        `).join('')
+                    : '<span class="text-xs text-slate-400 italic">No assignees yet</span>';
 
                 return `
                     <td>
@@ -620,6 +630,9 @@
                                 <option value="__custom__">[Custom text…]</option>
                             </select>
                             <input type="text" class="editable-input hidden" data-custom-input="${role}" data-index="${index}" placeholder="Enter custom label">
+                            <div class="flex flex-wrap gap-2" data-assignee-list="${role}" data-index="${index}">
+                                ${chipsHTML}
+                            </div>
                         </div>
                     </td>
                 `;
@@ -708,12 +721,15 @@
                     return;
                 }
                 const value = input.value.trim();
-                const previousValue = input.dataset.previousValue || '';
+                const existingValues = normalizeRoleValues(projectData.raciData[index][field]);
                 if (value) {
                     customPeople.add(value);
-                    projectData.raciData[index][field] = [value];
-                } else {
-                    projectData.raciData[index][field] = previousValue ? [previousValue] : [];
+                    const duplicateIndex = existingValues.indexOf(value);
+                    if (duplicateIndex !== -1) {
+                        existingValues.splice(duplicateIndex, 1);
+                    }
+                    existingValues.unshift(value);
+                    projectData.raciData[index][field] = existingValues;
                 }
                 renderRaciTable();
             };
@@ -770,37 +786,61 @@
                     return;
                 }
 
+                if (['R', 'A', 'C', 'I'].includes(field)) {
+                    const currentValues = normalizeRoleValues(projectData.raciData[index][field]);
+                    const customInput = row.querySelector(`input[data-custom-input="${field}"]`);
+
+                    if (target.value === '__custom__') {
+                        if (customInput) {
+                            customInput.classList.remove('hidden');
+                            customInput.dataset.field = field;
+                            customInput.dataset.index = index;
+                            delete customInput.dataset.processed;
+                            customInput.value = '';
+                            customInput.focus();
+                        }
+                        const primaryValue = currentValues[0] || '';
+                        target.value = primaryValue;
+                        return;
+                    }
+
+                    if (customInput) {
+                        customInput.classList.add('hidden');
+                        customInput.value = '';
+                        delete customInput.dataset.field;
+                        delete customInput.dataset.index;
+                        delete customInput.dataset.processed;
+                    }
+
+                    const selected = target.value;
+                    if (selected) {
+                        const existingIndex = currentValues.indexOf(selected);
+                        if (existingIndex !== -1) {
+                            currentValues.splice(existingIndex, 1);
+                        }
+                        currentValues.unshift(selected);
+                        projectData.raciData[index][field] = currentValues;
+                    } else {
+                        projectData.raciData[index][field] = [];
+                    }
+
+                    renderRaciTable();
+                }
+            });
+
             raciTable.addEventListener('click', (event) => {
                 if (isRaciLocked) {
                     return;
                 }
-                const button = event.target.closest('[data-action="add-person"]');
-                if (!button) return;
-                const index = parseInt(button.dataset.index, 10);
-                const role = button.dataset.role;
-                if (Number.isNaN(index) || !role) return;
-                const response = prompt('Enter a custom name, role, or group:');
-                if (response) {
-                    const trimmed = response.trim();
-                    if (trimmed) {
-                        customPeople.add(trimmed);
-                        if (!projectData.raciData[index][role].includes(trimmed)) {
-                            projectData.raciData[index][role].push(trimmed);
-                        }
-                        return;
-                    }
-
-                    if (input) {
-                        input.classList.add('hidden');
-                        input.value = '';
-                        delete input.dataset.field;
-                        delete input.dataset.index;
-                        delete input.dataset.previousValue;
-                        delete input.dataset.processed;
-                    }
-                    target.classList.remove('hidden');
-                    projectData.raciData[index][field] = target.value ? [target.value] : [];
-                }
+                const removeButton = event.target.closest('[data-action="remove-assignee"]');
+                if (!removeButton) return;
+                const role = removeButton.dataset.role;
+                const person = removeButton.dataset.person;
+                const assigneeIndex = parseInt(removeButton.dataset.index, 10);
+                if (Number.isNaN(assigneeIndex) || !role || !person) return;
+                const currentValues = normalizeRoleValues(projectData.raciData[assigneeIndex][role]);
+                projectData.raciData[assigneeIndex][role] = currentValues.filter(value => value !== person);
+                renderRaciTable();
             });
 
             raciTable.addEventListener('keydown', (event) => {
