@@ -91,6 +91,52 @@
             color: white;
             font-size: 0.75rem;
         }
+        .editable-input,
+        .editable-select,
+        .editable-textarea {
+            width: 100%;
+            border: 1px solid #cbd5f5;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            color: #1e293b;
+            background-color: #f8fafc;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .editable-input:focus,
+        .editable-select:focus,
+        .editable-textarea:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+            background-color: #ffffff;
+        }
+        .editable-select[multiple] {
+            min-height: 120px;
+        }
+        .table-control-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            background-color: #0ea5e9;
+            color: white;
+            transition: background-color 0.2s ease;
+        }
+        .table-control-button:hover {
+            background-color: #0284c7;
+        }
+        .table-inline-action {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #0284c7;
+            cursor: pointer;
+        }
+        .table-inline-action:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -251,7 +297,11 @@
             <h2 class="text-2xl font-bold text-slate-800 mb-4">IV. Master Deliverable Schedule & RACI Matrix</h2>
             <p class="text-slate-600 mb-6 max-w-4xl">This table provides a comprehensive overview of all contractual deliverables and clarifies team roles for each, ensuring clear ownership and accountability.</p>
             <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
-                 <div class="flex items-center space-x-4 mb-4 text-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 text-sm">
+                    <p class="text-slate-600">Use the controls to update deliverables, change assignments, or add new scope items in real time.</p>
+                    <button id="addDeliverable" type="button" class="table-control-button"><span>+</span> Add Deliverable</button>
+                </div>
+                <div class="flex items-center space-x-4 mb-4 text-sm">
                     <span class="font-bold">RACI Key:</span>
                     <span><span class="raci-key bg-sky-500">R</span> = Responsible</span>
                     <span><span class="raci-key bg-teal-500">A</span> = Accountable</span>
@@ -350,17 +400,17 @@
                     }
                 ],
                 raciData: [
-                    { id: 'D1', deliverable: 'Landscape Analysis & Lit Review', dueDate: 'Feb 28, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Kathy D., Ish R.', I: 'Joe B.' },
-                    { id: 'D2', deliverable: '[FINAL] Landscape Analysis', dueDate: '2 wks post-feedback', R: 'Luis C.', A: 'Michael C.', C: 'CDPH', I: '' },
-                    { id: 'D3', deliverable: 'Detailed Curriculum Outline', dueDate: 'Mar 30, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Ish R., Kathy D.', I: 'Joe B.' },
-                    { id: 'D4', deliverable: 'Curriculum: Grades TK-5', dueDate: 'May 31, 2026', R: 'Michael C.', A: 'Michael C.', C: 'Kathy D.', I: 'Luis C.' },
-                    { id: 'D5', deliverable: 'Training Materials: Grades TK-5', dueDate: 'May 31, 2026', R: 'Michael C.', A: 'Michael C.', C: 'Ish R.', I: 'Luis C.' },
-                    { id: 'D6', deliverable: 'Curriculum: Grades 6-8', dueDate: 'May 31, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Kathy D.', I: 'Michael C.' },
-                    { id: 'D7', deliverable: 'Training Materials: Grades 6-8', dueDate: 'May 31, 2026', R: 'Luis C.', A: 'Michael C.', C: 'Ish R.', I: 'Michael C.' },
-                    { id: 'D8', deliverable: 'Curriculum: Grades 9-12', dueDate: 'May 31, 2026', R: 'Michael C., Luis C.', A: 'Michael C.', C: 'Kathy D.', I: '' },
-                    { id: 'D9', deliverable: 'Training Materials: Grades 9-12', dueDate: 'May 31, 2026', R: 'Michael C., Luis C.', A: 'Michael C.', C: 'Ish R.', I: '' },
-                    { id: 'D10', deliverable: '[FINAL] Complete K-12 Package', dueDate: 'June 30, 2026', R: 'Michael C., Luis C.', A: 'Michael C.', C: 'Joe B., CDPH', I: '' },
-                    { id: 'D11', deliverable: 'Co-Branded Comms Materials', dueDate: 'Ongoing', R: 'Geneva S.', A: 'Michael C.', C: 'Ish R.', I: 'Full Team' },
+                    { id: 'D1', deliverable: 'Landscape Analysis & Lit Review', dueDate: { type: 'date', value: '2026-02-28' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Kathy D.', 'Ish R.'], I: ['Joe B.'] },
+                    { id: 'D2', deliverable: '[FINAL] Landscape Analysis', dueDate: { type: 'text', value: '2 wks post-feedback' }, R: ['Luis C.'], A: ['Michael C.'], C: ['CDPH'], I: [] },
+                    { id: 'D3', deliverable: 'Detailed Curriculum Outline', dueDate: { type: 'date', value: '2026-03-30' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Ish R.', 'Kathy D.'], I: ['Joe B.'] },
+                    { id: 'D4', deliverable: 'Curriculum: Grades TK-5', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.'], A: ['Michael C.'], C: ['Kathy D.'], I: ['Luis C.'] },
+                    { id: 'D5', deliverable: 'Training Materials: Grades TK-5', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.'], A: ['Michael C.'], C: ['Ish R.'], I: ['Luis C.'] },
+                    { id: 'D6', deliverable: 'Curriculum: Grades 6-8', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Kathy D.'], I: ['Michael C.'] },
+                    { id: 'D7', deliverable: 'Training Materials: Grades 6-8', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Luis C.'], A: ['Michael C.'], C: ['Ish R.'], I: ['Michael C.'] },
+                    { id: 'D8', deliverable: 'Curriculum: Grades 9-12', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Kathy D.'], I: [] },
+                    { id: 'D9', deliverable: 'Training Materials: Grades 9-12', dueDate: { type: 'date', value: '2026-05-31' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Ish R.'], I: [] },
+                    { id: 'D10', deliverable: '[FINAL] Complete K-12 Package', dueDate: { type: 'date', value: '2026-06-30' }, R: ['Michael C.', 'Luis C.'], A: ['Michael C.'], C: ['Joe B.', 'CDPH'], I: [] },
+                    { id: 'D11', deliverable: 'Co-Branded Comms Materials', dueDate: { type: 'text', value: 'Ongoing' }, R: ['Geneva S.'], A: ['Michael C.'], C: ['Ish R.'], I: ['Full Team'] },
                 ]
             };
 
@@ -476,22 +526,180 @@
             
             // RACI Table
             const raciTable = document.getElementById('raci-table');
-            let raciHTML = `<thead><tr class="bg-slate-50"><th>ID</th><th>Deliverable</th><th>Due Date</th><th>R</th><th>A</th><th>C</th><th>I</th></tr></thead><tbody>`;
-            projectData.raciData.forEach(item => {
-                raciHTML += `
-                    <tr>
-                        <td class="font-semibold text-slate-500">${item.id}</td>
-                        <td>${item.deliverable}</td>
-                        <td class="whitespace-nowrap">${item.dueDate}</td>
-                        <td>${item.R}</td>
-                        <td>${item.A}</td>
-                        <td>${item.C}</td>
-                        <td>${item.I}</td>
-                    </tr>
+            const basePeople = ['Luis C.', 'Michael C.', 'Kathy D.', 'Ish R.', 'Joe B.', 'Geneva S.', 'CDPH', 'Full Team'];
+            const customPeople = new Set();
+
+            const escapeHTML = (value = '') => String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+            const getAllPeople = (extra = []) => {
+                return Array.from(new Set([...basePeople, ...customPeople, ...extra.filter(Boolean)]));
+            };
+
+            const formatDatePreview = (value) => {
+                if (!value) {
+                    return 'Not set';
+                }
+                const parsed = new Date(value);
+                if (!Number.isNaN(parsed.getTime())) {
+                    return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+                return value;
+            };
+
+            const createDueDateCell = (dueDate) => {
+                const type = dueDate.type || 'date';
+                const value = dueDate.value || '';
+                const dateValue = type === 'date' ? value : '';
+                const textValue = type === 'text' ? value : '';
+                const previewValue = type === 'date' ? formatDatePreview(dateValue) : (textValue || 'Not set');
+
+                return `
+                    <td>
+                        <div class="space-y-2">
+                            <select class="editable-select" data-field="dueDateType">
+                                <option value="date" ${type === 'date' ? 'selected' : ''}>Date</option>
+                                <option value="text" ${type === 'text' ? 'selected' : ''}>Text</option>
+                            </select>
+                            <input type="date" class="editable-input ${type === 'text' ? 'hidden' : ''}" data-field="dueDateDate" value="${escapeHTML(dateValue)}">
+                            <input type="text" class="editable-input ${type === 'date' ? 'hidden' : ''}" data-field="dueDateText" placeholder="Enter custom label" value="${escapeHTML(textValue)}">
+                            <p class="text-xs text-slate-500">Preview: <span data-preview="dueDate">${escapeHTML(previewValue)}</span></p>
+                        </div>
+                    </td>
                 `;
+            };
+
+            const createRoleCell = (role, values = [], index) => {
+                const normalizedValues = Array.isArray(values) ? values : String(values).split(',').map(v => v.trim()).filter(Boolean);
+                const options = getAllPeople(normalizedValues);
+                return `
+                    <td>
+                        <div class="space-y-2">
+                            <select multiple class="editable-select" data-field="${role}">
+                                ${options.map(person => `<option value="${escapeHTML(person)}" ${normalizedValues.includes(person) ? 'selected' : ''}>${escapeHTML(person)}</option>`).join('')}
+                            </select>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-slate-400">Ctrl/Cmd+Click for multi-select</span>
+                                <button type="button" class="table-inline-action" data-action="add-person" data-role="${role}" data-index="${index}">+ Add custom</button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+            };
+
+            const renderRaciTable = () => {
+                let raciHTML = `<thead><tr class="bg-slate-50"><th class="whitespace-nowrap">ID</th><th>Deliverable</th><th class="whitespace-nowrap">Due Date</th><th>R</th><th>A</th><th>C</th><th>I</th></tr></thead><tbody>`;
+                projectData.raciData.forEach((item, index) => {
+                    raciHTML += `
+                        <tr data-index="${index}">
+                            <td><input type="text" class="editable-input" data-field="id" value="${escapeHTML(item.id || '')}" placeholder="e.g. D12"></td>
+                            <td><textarea class="editable-textarea" rows="2" data-field="deliverable" placeholder="Describe the deliverable">${escapeHTML(item.deliverable || '')}</textarea></td>
+                            ${createDueDateCell(item.dueDate || { type: 'date', value: '' })}
+                            ${createRoleCell('R', item.R, index)}
+                            ${createRoleCell('A', item.A, index)}
+                            ${createRoleCell('C', item.C, index)}
+                            ${createRoleCell('I', item.I, index)}
+                        </tr>
+                    `;
+                });
+                raciHTML += '</tbody>';
+                raciTable.innerHTML = raciHTML;
+            };
+
+            renderRaciTable();
+
+            raciTable.addEventListener('input', (event) => {
+                const target = event.target;
+                const row = target.closest('tr');
+                if (!row) return;
+                const index = parseInt(row.dataset.index, 10);
+                if (Number.isNaN(index)) return;
+                const field = target.dataset.field;
+
+                if (field === 'id' || field === 'deliverable') {
+                    projectData.raciData[index][field] = target.value;
+                }
+
+                if (field === 'dueDateDate') {
+                    projectData.raciData[index].dueDate.value = target.value;
+                    const preview = row.querySelector('[data-preview="dueDate"]');
+                    if (preview) {
+                        preview.textContent = formatDatePreview(target.value);
+                    }
+                }
+
+                if (field === 'dueDateText') {
+                    projectData.raciData[index].dueDate.value = target.value;
+                    const preview = row.querySelector('[data-preview="dueDate"]');
+                    if (preview) {
+                        preview.textContent = target.value || 'Not set';
+                    }
+                }
             });
-            raciHTML += `</tbody>`;
-            raciTable.innerHTML = raciHTML;
+
+            raciTable.addEventListener('change', (event) => {
+                const target = event.target;
+                const row = target.closest('tr');
+                if (!row) return;
+                const index = parseInt(row.dataset.index, 10);
+                if (Number.isNaN(index)) return;
+                const field = target.dataset.field;
+
+                if (target.multiple && field) {
+                    projectData.raciData[index][field] = Array.from(target.selectedOptions).map(option => option.value);
+                }
+
+                if (field === 'dueDateType') {
+                    projectData.raciData[index].dueDate.type = target.value;
+                    if (target.value === 'text' && !projectData.raciData[index].dueDate.value) {
+                        projectData.raciData[index].dueDate.value = '';
+                    }
+                    renderRaciTable();
+                }
+            });
+
+            raciTable.addEventListener('click', (event) => {
+                const button = event.target.closest('[data-action="add-person"]');
+                if (!button) return;
+                const index = parseInt(button.dataset.index, 10);
+                const role = button.dataset.role;
+                if (Number.isNaN(index) || !role) return;
+                const response = prompt('Enter a custom name, role, or group:');
+                if (response) {
+                    const trimmed = response.trim();
+                    if (trimmed) {
+                        customPeople.add(trimmed);
+                        if (!projectData.raciData[index][role].includes(trimmed)) {
+                            projectData.raciData[index][role].push(trimmed);
+                        }
+                        renderRaciTable();
+                    }
+                }
+            });
+
+            const addDeliverableBtn = document.getElementById('addDeliverable');
+            if (addDeliverableBtn) {
+                addDeliverableBtn.addEventListener('click', () => {
+                    projectData.raciData.push({
+                        id: '',
+                        deliverable: '',
+                        dueDate: { type: 'date', value: '' },
+                        R: [],
+                        A: [],
+                        C: [],
+                        I: []
+                    });
+                    renderRaciTable();
+                    const lastRowInput = raciTable.querySelector('tbody tr:last-child input[data-field="id"]');
+                    if (lastRowInput) {
+                        lastRowInput.focus();
+                    }
+                });
+            }
 
             // Modal Logic
             const modal = document.getElementById('taskModal');
