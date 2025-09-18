@@ -33,6 +33,36 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .gantt-header-label {
+            flex: 1;
+            text-align: center;
+        }
+        .gantt-header--task .gantt-header-label {
+            text-align: left;
+        }
+        .gantt-header-handle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 0.75rem;
+            height: 100%;
+            cursor: col-resize;
+            touch-action: none;
+        }
+        .gantt-header-handle::before {
+            content: '';
+            display: block;
+            width: 0.25rem;
+            height: 60%;
+            border-radius: 9999px;
+            background-color: #cbd5f5;
+        }
+        .timeline-unlocked .gantt-header-handle {
+            display: flex;
         }
         .gantt-task-name {
             background-color: #ffffff;
@@ -558,16 +588,122 @@
             const getMonthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
             let isTimelineLocked = true;
+            let columnWidths = [];
+            let activeColumnResize = null;
+            let activePointerId = null;
+            let currentGanttGrid = null;
+            const MIN_COLUMN_WIDTH = 80;
+
+            const formatColumnTemplate = (columnsCount) => {
+                if (columnWidths.length === columnsCount) {
+                    return columnWidths
+                        .map(width => `${Math.max(MIN_COLUMN_WIDTH, Math.round(width))}px`)
+                        .join(' ');
+                }
+                return `200px repeat(${columnsCount - 1}, 1fr)`;
+            };
+
+            const applyColumnWidths = (gridElement) => {
+                if (!gridElement || columnWidths.length !== months.length) {
+                    return;
+                }
+                const template = columnWidths
+                    .map(width => `${Math.max(MIN_COLUMN_WIDTH, Math.round(width))}px`)
+                    .join(' ');
+                gridElement.style.gridTemplateColumns = template;
+            };
+
+            const initializeColumnWidths = (gridElement) => {
+                if (!gridElement) {
+                    return;
+                }
+                if (columnWidths.length !== months.length) {
+                    const headerCells = Array.from(ganttContainer.querySelectorAll('.gantt-header'));
+                    const measuredWidths = headerCells.map(cell => cell.getBoundingClientRect().width);
+                    if (measuredWidths.length === months.length && measuredWidths.every(width => width > 0)) {
+                        columnWidths = measuredWidths;
+                    } else {
+                        columnWidths = [200, ...Array(months.length - 1).fill(120)];
+                    }
+                }
+                applyColumnWidths(gridElement);
+            };
+
+            const attachColumnResizeListeners = () => {
+                const handles = ganttContainer.querySelectorAll('.gantt-header-handle');
+                handles.forEach(handle => {
+                    handle.addEventListener('pointerdown', (event) => {
+                        if (isTimelineLocked) {
+                            return;
+                        }
+                        if (columnWidths.length !== months.length && currentGanttGrid) {
+                            initializeColumnWidths(currentGanttGrid);
+                        }
+                        const columnIndex = parseInt(handle.dataset.columnIndex, 10);
+                        if (Number.isNaN(columnIndex)) {
+                            return;
+                        }
+                        const header = handle.closest('.gantt-header');
+                        const existingWidth = columnWidths[columnIndex];
+                        const fallbackWidth = header ? header.getBoundingClientRect().width : MIN_COLUMN_WIDTH;
+                        const referenceWidth = Math.max(MIN_COLUMN_WIDTH, typeof existingWidth === 'number' ? existingWidth : fallbackWidth);
+                        activeColumnResize = {
+                            index: columnIndex,
+                            startX: event.clientX,
+                            startWidth: referenceWidth,
+                            handle
+                        };
+                        activePointerId = event.pointerId;
+                        handle.setPointerCapture(activePointerId);
+                        event.preventDefault();
+                    });
+                });
+            };
+
+            const bindGlobalResizeListeners = () => {
+                if (bindGlobalResizeListeners.bound) {
+                    return;
+                }
+                bindGlobalResizeListeners.bound = true;
+                window.addEventListener('pointermove', (event) => {
+                    if (!activeColumnResize || !currentGanttGrid || isTimelineLocked) {
+                        return;
+                    }
+                    const delta = event.clientX - activeColumnResize.startX;
+                    const nextWidth = Math.max(MIN_COLUMN_WIDTH, activeColumnResize.startWidth + delta);
+                    columnWidths[activeColumnResize.index] = nextWidth;
+                    applyColumnWidths(currentGanttGrid);
+                });
+                const handlePointerComplete = () => {
+                    if (!activeColumnResize) {
+                        return;
+                    }
+                    if (activeColumnResize.handle && activePointerId !== null && activeColumnResize.handle.hasPointerCapture(activePointerId)) {
+                        activeColumnResize.handle.releasePointerCapture(activePointerId);
+                    }
+                    activeColumnResize = null;
+                    activePointerId = null;
+                };
+                window.addEventListener('pointerup', handlePointerComplete);
+                window.addEventListener('pointercancel', handlePointerComplete);
+            };
+            bindGlobalResizeListeners.bound = false;
+            bindGlobalResizeListeners();
 
             const renderTimeline = () => {
                 const timelineItems = getAllTasks()
                     .slice()
                     .sort((a, b) => new Date(a.task.start) - new Date(b.task.start));
 
-                let ganttHTML = `<div class="gantt-grid" style="grid-template-columns: 200px repeat(${months.length - 1}, 1fr);">`;
-                ganttHTML += '<div class="gantt-header" style="position: sticky; left: 0; z-index:11;">Task</div>';
-                months.slice(0, -1).forEach(month => {
-                    ganttHTML += `<div class="gantt-header">${month.toLocaleString('default', { month: 'short' })} '${month.getFullYear().toString().slice(-2)}</div>`;
+                const columnsCount = months.length;
+                let ganttHTML = `<div class="gantt-grid" style="grid-template-columns: ${formatColumnTemplate(columnsCount)};">`;
+                const taskHandle = isTimelineLocked ? '' : '<span class="gantt-header-handle" data-column-index="0" aria-hidden="true"></span>';
+                ganttHTML += `<div class="gantt-header gantt-header--task" style="position: sticky; left: 0; z-index:11;"><span class="gantt-header-label">Task</span>${taskHandle}</div>`;
+                months.slice(0, -1).forEach((month, monthIndex) => {
+                    const columnIndex = monthIndex + 1;
+                    const headerLabel = `${month.toLocaleString('default', { month: 'short' })} '${month.getFullYear().toString().slice(-2)}`;
+                    const handleMarkup = isTimelineLocked ? '' : `<span class="gantt-header-handle" data-column-index="${columnIndex}" aria-hidden="true"></span>`;
+                    ganttHTML += `<div class="gantt-header"><span class="gantt-header-label">${headerLabel}</span>${handleMarkup}</div>`;
                 });
 
                 timelineItems.forEach(({ task, phase }) => {
@@ -618,6 +754,10 @@
 
                 ganttHTML += '</div>';
                 ganttContainer.innerHTML = ganttHTML;
+                ganttContainer.classList.toggle('timeline-unlocked', !isTimelineLocked);
+                currentGanttGrid = ganttContainer.querySelector('.gantt-grid');
+                initializeColumnWidths(currentGanttGrid);
+                attachColumnResizeListeners();
             };
 
             const toggleTimelineLockBtn = document.getElementById('toggleTimelineLock');
