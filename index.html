@@ -154,6 +154,54 @@
         .table-inline-action:hover {
             text-decoration: underline;
         }
+        .timeline-textarea {
+            width: 100%;
+            border: 1px solid #cbd5f5;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            color: #1e293b;
+            background-color: #f8fafc;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            resize: vertical;
+        }
+        .timeline-textarea:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+            background-color: #ffffff;
+        }
+        .gantt-task-name--editable {
+            white-space: normal;
+            overflow: visible;
+        }
+        .gantt-cell--editing {
+            padding: 0.25rem;
+            background-color: #f8fafc;
+        }
+        .timeline-cell-editor-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            height: 100%;
+        }
+        .timeline-boundary-label {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.625rem;
+            font-weight: 600;
+            color: #475569;
+            gap: 0.25rem;
+        }
+        .timeline-boundary-input {
+            width: 100%;
+            border: 1px solid #cbd5f5;
+            border-radius: 0.375rem;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.75rem;
+            color: #1e293b;
+            background-color: #ffffff;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -236,6 +284,12 @@
             <h2 class="text-2xl font-bold text-slate-800 mb-4">II. Master Project Timeline</h2>
             <p class="text-slate-600 mb-6 max-w-4xl">This is the detailed, execution-focused roadmap for the project. The interactive timeline below provides a visual overview of the major tasks and phases. Click on any task bar to view more details.</p>
             <div class="bg-white rounded-lg shadow-lg">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 border-b border-slate-200 text-sm">
+                    <p class="text-slate-600">Switch between review and edit modes to adjust task timing notes inline.</p>
+                    <div class="flex items-center gap-2">
+                        <button id="toggleTimelineLock" type="button" class="table-control-button table-control-button--secondary"><span aria-hidden="true">🔒</span><span> Lock Timeline</span></button>
+                    </div>
+                </div>
                 <div id="gantt-wrapper" class="overflow-auto" style="max-height: 60vh;">
                      <div id="gantt-chart-container" class="min-w-[800px] p-1"></div>
                 </div>
@@ -436,8 +490,13 @@
                 ]
             };
 
-            const allTasks = projectData.phases.flatMap(p => p.tasks.map(t => ({ ...t, phaseColor: p.color, phaseName: p.name })));
-            
+            const escapeHTML = (value = '') => String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
             // Workload Chart
             const workloadCtx = document.getElementById('workloadChart').getContext('2d');
             new Chart(workloadCtx, {
@@ -475,42 +534,180 @@
                 months.push(new Date(currentDate));
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
-            
-            let ganttHTML = '<div class="gantt-grid" style="grid-template-columns: 200px repeat(' + (months.length -1) +', 1fr);">';
-            ganttHTML += '<div class="gantt-header" style="position: sticky; left: 0; z-index:11;">Task</div>';
-            months.slice(0, -1).forEach(month => {
-                ganttHTML += `<div class="gantt-header">${month.toLocaleString('default', { month: 'short' })} '${month.getFullYear().toString().slice(-2)}</div>`;
-            });
-            
-            allTasks.sort((a,b) => new Date(a.start) - new Date(b.start)).forEach(task => {
-                ganttHTML += `<div class="gantt-row">`;
-                ganttHTML += `<div class="gantt-task-name" title="${task.name}">${task.name}</div>`;
-                months.slice(0, -1).forEach((month, index) => {
-                    const nextMonth = months[index+1];
-                    const taskStart = new Date(task.start);
-                    const taskEnd = new Date(task.end);
-                    const start = new Date(Math.max(month, taskStart));
-                    const end = new Date(Math.min(nextMonth, taskEnd));
 
-                    if(start < end){
-                        const monthDays = (nextMonth - month) / (1000 * 60 * 60 * 24);
-                        const left = ((start - month) / (1000 * 60 * 60 * 24)) / monthDays * 100;
-                        const width = ((end - start) / (1000 * 60 * 60 * 24)) / monthDays * 100;
-                        ganttHTML += `<div class="gantt-cell"><div class="gantt-bar ${task.phaseColor}" style="left:${left}%; width:${width}%" data-task-id="${task.id}"></div></div>`;
-                    } else {
-                        ganttHTML += `<div class="gantt-cell"></div>`;
+            projectData.phases.forEach(phase => {
+                phase.tasks.forEach(task => {
+                    if (!task.timelineNotes) {
+                        task.timelineNotes = {};
                     }
                 });
-                ganttHTML += `</div>`;
             });
-            ganttHTML += '</div>';
-            ganttContainer.innerHTML = ganttHTML;
+
+            const getAllTasks = () => projectData.phases.flatMap(phase => phase.tasks.map(task => ({ task, phase })));
+
+            const findTaskById = (id) => {
+                for (const phase of projectData.phases) {
+                    const match = phase.tasks.find(task => task.id === id);
+                    if (match) {
+                        return { task: match, phase };
+                    }
+                }
+                return null;
+            };
+
+            const getMonthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+            let isTimelineLocked = true;
+
+            const renderTimeline = () => {
+                const timelineItems = getAllTasks()
+                    .slice()
+                    .sort((a, b) => new Date(a.task.start) - new Date(b.task.start));
+
+                let ganttHTML = `<div class="gantt-grid" style="grid-template-columns: 200px repeat(${months.length - 1}, 1fr);">`;
+                ganttHTML += '<div class="gantt-header" style="position: sticky; left: 0; z-index:11;">Task</div>';
+                months.slice(0, -1).forEach(month => {
+                    ganttHTML += `<div class="gantt-header">${month.toLocaleString('default', { month: 'short' })} '${month.getFullYear().toString().slice(-2)}</div>`;
+                });
+
+                timelineItems.forEach(({ task, phase }) => {
+                    if (!task.timelineNotes) {
+                        task.timelineNotes = {};
+                    }
+                    ganttHTML += `<div class="gantt-row" data-task-id="${task.id}">`;
+                    if (isTimelineLocked) {
+                        ganttHTML += `<div class="gantt-task-name" title="${escapeHTML(task.name)}">${escapeHTML(task.name)}</div>`;
+                    } else {
+                        ganttHTML += `<div class="gantt-task-name gantt-task-name--editable"><textarea class="timeline-textarea timeline-textarea--name" data-task-id="${task.id}" data-field="name" placeholder="Task name">${escapeHTML(task.name || '')}</textarea></div>`;
+                    }
+
+                    months.slice(0, -1).forEach((month, index) => {
+                        const nextMonth = months[index + 1];
+                        const taskStart = new Date(task.start);
+                        const taskEnd = new Date(task.end);
+                        const start = new Date(Math.max(month, taskStart));
+                        const end = new Date(Math.min(nextMonth, taskEnd));
+
+                        if (start < end) {
+                            if (isTimelineLocked) {
+                                const monthDays = (nextMonth - month) / (1000 * 60 * 60 * 24);
+                                const left = ((start - month) / (1000 * 60 * 60 * 24)) / monthDays * 100;
+                                const width = ((end - start) / (1000 * 60 * 60 * 24)) / monthDays * 100;
+                                ganttHTML += `<div class="gantt-cell"><div class="gantt-bar ${phase.color}" style="left:${left}%; width:${width}%" data-task-id="${task.id}"></div></div>`;
+                            } else {
+                                const monthKey = getMonthKey(month);
+                                const isStartMonth = taskStart >= month && taskStart < nextMonth;
+                                const isEndMonth = taskEnd > month && taskEnd <= nextMonth;
+                                const noteValue = task.timelineNotes[monthKey] || '';
+                                ganttHTML += `
+                                    <div class="gantt-cell gantt-cell--editing">
+                                        <div class="timeline-cell-editor-container">
+                                            ${isStartMonth ? `<label class="timeline-boundary-label">Start<input type="date" class="timeline-boundary-input" data-boundary="start" data-task-id="${task.id}" value="${escapeHTML(task.start)}"></label>` : ''}
+                                            <textarea class="timeline-textarea timeline-textarea--cell" data-task-id="${task.id}" data-month-key="${monthKey}" placeholder="Add notes">${escapeHTML(noteValue)}</textarea>
+                                            ${isEndMonth ? `<label class="timeline-boundary-label">End<input type="date" class="timeline-boundary-input" data-boundary="end" data-task-id="${task.id}" value="${escapeHTML(task.end)}"></label>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            ganttHTML += `<div class="gantt-cell${isTimelineLocked ? '' : ' gantt-cell--editing'}"></div>`;
+                        }
+                    });
+                    ganttHTML += `</div>`;
+                });
+
+                ganttHTML += '</div>';
+                ganttContainer.innerHTML = ganttHTML;
+            };
+
+            const toggleTimelineLockBtn = document.getElementById('toggleTimelineLock');
+
+            const updateTimelineLockUI = () => {
+                if (toggleTimelineLockBtn) {
+                    toggleTimelineLockBtn.innerHTML = isTimelineLocked
+                        ? '<span aria-hidden="true">🔓</span><span> Unlock Timeline</span>'
+                        : '<span aria-hidden="true">🔒</span><span> Lock Timeline</span>';
+                    toggleTimelineLockBtn.setAttribute('aria-pressed', String(isTimelineLocked));
+                    toggleTimelineLockBtn.setAttribute('aria-label', isTimelineLocked ? 'Unlock timeline for editing' : 'Lock timeline view');
+                    toggleTimelineLockBtn.classList.add('table-control-button--secondary');
+                    toggleTimelineLockBtn.classList.toggle('table-control-button--active', isTimelineLocked);
+                }
+                renderTimeline();
+            };
+
+            if (toggleTimelineLockBtn) {
+                toggleTimelineLockBtn.addEventListener('click', () => {
+                    isTimelineLocked = !isTimelineLocked;
+                    updateTimelineLockUI();
+                });
+            }
+
+            updateTimelineLockUI();
+
+            ganttContainer.addEventListener('input', (event) => {
+                if (isTimelineLocked) {
+                    return;
+                }
+                const target = event.target;
+                if (target.classList.contains('timeline-textarea--name')) {
+                    const taskId = parseInt(target.dataset.taskId, 10);
+                    const entry = findTaskById(taskId);
+                    if (entry) {
+                        entry.task.name = target.value;
+                    }
+                }
+
+                if (target.classList.contains('timeline-textarea--cell')) {
+                    const taskId = parseInt(target.dataset.taskId, 10);
+                    const monthKey = target.dataset.monthKey;
+                    const entry = findTaskById(taskId);
+                    if (entry && monthKey) {
+                        const value = target.value.trim();
+                        if (value) {
+                            entry.task.timelineNotes[monthKey] = target.value;
+                        } else {
+                            delete entry.task.timelineNotes[monthKey];
+                        }
+                    }
+                }
+            });
+
+            ganttContainer.addEventListener('change', (event) => {
+                if (isTimelineLocked) {
+                    return;
+                }
+                const target = event.target;
+                if (target.classList.contains('timeline-boundary-input')) {
+                    const taskId = parseInt(target.dataset.taskId, 10);
+                    const boundary = target.dataset.boundary;
+                    const entry = findTaskById(taskId);
+                    if (!entry || !boundary) {
+                        return;
+                    }
+                    const value = target.value;
+                    if (!value) {
+                        return;
+                    }
+                    if (boundary === 'start') {
+                        entry.task.start = value;
+                        if (new Date(entry.task.start) > new Date(entry.task.end)) {
+                            entry.task.end = value;
+                        }
+                    } else if (boundary === 'end') {
+                        entry.task.end = value;
+                        if (new Date(entry.task.start) > new Date(entry.task.end)) {
+                            entry.task.start = value;
+                        }
+                    }
+                    renderTimeline();
+                }
+            });
 
             // Phases Accordion
             const accordionContainer = document.getElementById('phases-accordion');
             let accordionHTML = '';
             projectData.phases.forEach(phase => {
-                const phaseTasks = allTasks.filter(t => t.phaseName === phase.name);
+                const phaseTasks = phase.tasks;
                 accordionHTML += `
                     <div class="bg-white rounded-lg shadow-md overflow-hidden">
                         <button class="accordion-toggle w-full p-4 text-left font-semibold text-slate-800 flex justify-between items-center hover:bg-slate-50 transition">
@@ -551,13 +748,6 @@
             const basePeople = ['Luis C.', 'Michael C.', 'Kathy D.', 'Iish R.', 'Joe B.', 'Geneva S.', 'CDPH', 'Full Team'];
             const customPeople = new Set();
             let isRaciLocked = false;
-
-            const escapeHTML = (value = '') => String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
 
             const getAllPeople = (extra = []) => {
                 return Array.from(new Set([...basePeople, ...customPeople, ...extra.filter(Boolean)]));
@@ -918,9 +1108,10 @@
 
             ganttContainer.addEventListener('click', function(e) {
                 if (e.target.classList.contains('gantt-bar')) {
-                    const taskId = parseInt(e.target.dataset.taskId);
-                    const task = allTasks.find(t => t.id === taskId);
-                    if (task) {
+                    const taskId = parseInt(e.target.dataset.taskId, 10);
+                    const entry = findTaskById(taskId);
+                    if (entry) {
+                        const { task } = entry;
                         document.getElementById('modalTitle').textContent = task.name;
                         document.getElementById('modalDuration').textContent = `${task.start} to ${task.end}`;
                         document.getElementById('modalOwner').textContent = task.owner.join(', ');
