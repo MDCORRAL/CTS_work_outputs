@@ -128,6 +128,23 @@
         .table-control-button:hover {
             background-color: #0284c7;
         }
+        .table-control-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #7dd3fc;
+        }
+        .table-control-button--secondary {
+            background-color: #64748b;
+        }
+        .table-control-button--secondary:hover {
+            background-color: #475569;
+        }
+        .table-control-button--secondary.table-control-button--active {
+            background-color: #334155;
+        }
+        .table-control-button--secondary.table-control-button--active:hover {
+            background-color: #1e293b;
+        }
         .table-inline-action {
             font-size: 0.75rem;
             font-weight: 600;
@@ -299,7 +316,10 @@
             <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 text-sm">
                     <p class="text-slate-600">Use the controls to update deliverables, change assignments, or add new scope items in real time.</p>
-                    <button id="addDeliverable" type="button" class="table-control-button"><span>+</span> Add Deliverable</button>
+                    <div class="flex flex-wrap items-center justify-end gap-2">
+                        <button id="toggleRaciLock" type="button" class="table-control-button table-control-button--secondary"><span aria-hidden="true">🔒</span><span> Lock View</span></button>
+                        <button id="addDeliverable" type="button" class="table-control-button"><span aria-hidden="true">+</span><span> Add Deliverable</span></button>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4 mb-4 text-sm">
                     <span class="font-bold">RACI Key:</span>
@@ -528,6 +548,7 @@
             const raciTable = document.getElementById('raci-table');
             const basePeople = ['Luis C.', 'Michael C.', 'Kathy D.', 'Ish R.', 'Joe B.', 'Geneva S.', 'CDPH', 'Full Team'];
             const customPeople = new Set();
+            let isRaciLocked = false;
 
             const escapeHTML = (value = '') => String(value)
                 .replace(/&/g, '&amp;')
@@ -551,7 +572,7 @@
                 return value;
             };
 
-            const createDueDateCell = (dueDate) => {
+            const createDueDateCellEditable = (dueDate) => {
                 const type = dueDate.type || 'date';
                 const value = dueDate.value || '';
                 const dateValue = type === 'date' ? value : '';
@@ -573,8 +594,18 @@
                 `;
             };
 
-            const createRoleCell = (role, values = [], index) => {
-                const normalizedValues = Array.isArray(values) ? values : String(values).split(',').map(v => v.trim()).filter(Boolean);
+            const normalizeRoleValues = (values = []) => {
+                if (Array.isArray(values)) {
+                    return values.filter(Boolean);
+                }
+                if (values === undefined || values === null) {
+                    return [];
+                }
+                return String(values).split(',').map(v => v.trim()).filter(Boolean);
+            };
+
+            const createRoleCellEditable = (role, values = [], index) => {
+                const normalizedValues = normalizeRoleValues(values);
                 const options = getAllPeople(normalizedValues);
                 return `
                     <td>
@@ -591,21 +622,73 @@
                 `;
             };
 
+            const formatDisplayValue = (value, { placeholder = '—', preserveWhitespace = false } = {}) => {
+                if (!value) {
+                    return `<span class="text-slate-400 italic">${placeholder}</span>`;
+                }
+                return preserveWhitespace ? `<span class="whitespace-pre-line">${escapeHTML(value)}</span>` : escapeHTML(value);
+            };
+
+            const createDueDateCellReadOnly = (dueDate = { type: 'date', value: '' }) => {
+                const type = dueDate.type || 'date';
+                const value = dueDate.value || '';
+                const display = type === 'text' ? value : formatDatePreview(value);
+                return `<td class="whitespace-nowrap">${formatDisplayValue(display, { placeholder: 'Not set' })}</td>`;
+            };
+
+            const createRoleCellReadOnly = (values = []) => {
+                const normalizedValues = normalizeRoleValues(values);
+                if (!normalizedValues.length) {
+                    return '<td><span class="text-slate-400 italic">—</span></td>';
+                }
+                return `
+                    <td>
+                        <ul class="space-y-1">
+                            ${normalizedValues.map(person => `<li>${escapeHTML(person)}</li>`).join('')}
+                        </ul>
+                    </td>
+                `;
+            };
+
             const renderRaciTable = () => {
                 let raciHTML = `<thead><tr class="bg-slate-50"><th class="whitespace-nowrap">ID</th><th>Deliverable</th><th class="whitespace-nowrap">Due Date</th><th>R</th><th>A</th><th>C</th><th>I</th></tr></thead><tbody>`;
-                projectData.raciData.forEach((item, index) => {
-                    raciHTML += `
-                        <tr data-index="${index}">
-                            <td><input type="text" class="editable-input" data-field="id" value="${escapeHTML(item.id || '')}" placeholder="e.g. D12"></td>
-                            <td><textarea class="editable-textarea" rows="2" data-field="deliverable" placeholder="Describe the deliverable">${escapeHTML(item.deliverable || '')}</textarea></td>
-                            ${createDueDateCell(item.dueDate || { type: 'date', value: '' })}
-                            ${createRoleCell('R', item.R, index)}
-                            ${createRoleCell('A', item.A, index)}
-                            ${createRoleCell('C', item.C, index)}
-                            ${createRoleCell('I', item.I, index)}
-                        </tr>
-                    `;
-                });
+
+                const rows = projectData.raciData
+                    .map((item, index) => ({ item, index }))
+                    .filter(({ item }) => !isRaciLocked || ((item.deliverable || '').trim().length > 0));
+
+                if (!rows.length) {
+                    raciHTML += '<tr><td colspan="7" class="py-4 text-center text-slate-500">No deliverables to display.</td></tr>';
+                } else {
+                    rows.forEach(({ item, index }) => {
+                        if (isRaciLocked) {
+                            raciHTML += `
+                                <tr data-index="${index}">
+                                    <td class="whitespace-nowrap">${formatDisplayValue(item.id)}</td>
+                                    <td>${formatDisplayValue(item.deliverable, { placeholder: 'No description', preserveWhitespace: true })}</td>
+                                    ${createDueDateCellReadOnly(item.dueDate)}
+                                    ${createRoleCellReadOnly(item.R)}
+                                    ${createRoleCellReadOnly(item.A)}
+                                    ${createRoleCellReadOnly(item.C)}
+                                    ${createRoleCellReadOnly(item.I)}
+                                </tr>
+                            `;
+                        } else {
+                            raciHTML += `
+                                <tr data-index="${index}">
+                                    <td><input type="text" class="editable-input" data-field="id" value="${escapeHTML(item.id || '')}" placeholder="e.g. D12"></td>
+                                    <td><textarea class="editable-textarea" rows="2" data-field="deliverable" placeholder="Describe the deliverable">${escapeHTML(item.deliverable || '')}</textarea></td>
+                                    ${createDueDateCellEditable(item.dueDate || { type: 'date', value: '' })}
+                                    ${createRoleCellEditable('R', item.R, index)}
+                                    ${createRoleCellEditable('A', item.A, index)}
+                                    ${createRoleCellEditable('C', item.C, index)}
+                                    ${createRoleCellEditable('I', item.I, index)}
+                                </tr>
+                            `;
+                        }
+                    });
+                }
+
                 raciHTML += '</tbody>';
                 raciTable.innerHTML = raciHTML;
             };
@@ -613,6 +696,9 @@
             renderRaciTable();
 
             raciTable.addEventListener('input', (event) => {
+                if (isRaciLocked) {
+                    return;
+                }
                 const target = event.target;
                 const row = target.closest('tr');
                 if (!row) return;
@@ -642,6 +728,9 @@
             });
 
             raciTable.addEventListener('change', (event) => {
+                if (isRaciLocked) {
+                    return;
+                }
                 const target = event.target;
                 const row = target.closest('tr');
                 if (!row) return;
@@ -663,6 +752,9 @@
             });
 
             raciTable.addEventListener('click', (event) => {
+                if (isRaciLocked) {
+                    return;
+                }
                 const button = event.target.closest('[data-action="add-person"]');
                 if (!button) return;
                 const index = parseInt(button.dataset.index, 10);
@@ -682,8 +774,32 @@
             });
 
             const addDeliverableBtn = document.getElementById('addDeliverable');
+            const toggleRaciLockBtn = document.getElementById('toggleRaciLock');
+
+            const updateLockUI = ({ render = true } = {}) => {
+                if (toggleRaciLockBtn) {
+                    toggleRaciLockBtn.innerHTML = isRaciLocked
+                        ? '<span aria-hidden="true">🔓</span><span> Unlock Editing</span>'
+                        : '<span aria-hidden="true">🔒</span><span> Lock View</span>';
+                    toggleRaciLockBtn.setAttribute('aria-pressed', String(isRaciLocked));
+                    toggleRaciLockBtn.setAttribute('aria-label', isRaciLocked ? 'Unlock deliverables for editing' : 'Lock deliverables table');
+                    toggleRaciLockBtn.classList.add('table-control-button--secondary');
+                    toggleRaciLockBtn.classList.toggle('table-control-button--active', isRaciLocked);
+                }
+                if (addDeliverableBtn) {
+                    addDeliverableBtn.disabled = isRaciLocked;
+                    addDeliverableBtn.setAttribute('aria-disabled', String(isRaciLocked));
+                }
+                if (render) {
+                    renderRaciTable();
+                }
+            };
+
             if (addDeliverableBtn) {
                 addDeliverableBtn.addEventListener('click', () => {
+                    if (isRaciLocked) {
+                        return;
+                    }
                     projectData.raciData.push({
                         id: '',
                         deliverable: '',
@@ -700,6 +816,15 @@
                     }
                 });
             }
+
+            if (toggleRaciLockBtn) {
+                toggleRaciLockBtn.addEventListener('click', () => {
+                    isRaciLocked = !isRaciLocked;
+                    updateLockUI();
+                });
+            }
+
+            updateLockUI({ render: false });
 
             // Modal Logic
             const modal = document.getElementById('taskModal');
