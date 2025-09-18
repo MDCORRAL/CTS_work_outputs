@@ -607,16 +607,17 @@
             const createRoleCellEditable = (role, values = [], index) => {
                 const normalizedValues = normalizeRoleValues(values);
                 const options = getAllPeople(normalizedValues);
+
+
                 return `
                     <td>
                         <div class="space-y-2">
-                            <select multiple class="editable-select" data-field="${role}">
-                                ${options.map(person => `<option value="${escapeHTML(person)}" ${normalizedValues.includes(person) ? 'selected' : ''}>${escapeHTML(person)}</option>`).join('')}
+                            <select class="editable-select" data-field="${role}" data-index="${index}">
+                                <option value="" ${selectedValue ? '' : 'selected'} disabled>Select a person</option>
+                                ${options.map(person => `<option value="${escapeHTML(person)}" ${selectedValue === person ? 'selected' : ''}>${escapeHTML(person)}</option>`).join('')}
+                                <option value="__custom__">[Custom text…]</option>
                             </select>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-400">Ctrl/Cmd+Click for multi-select</span>
-                                <button type="button" class="table-inline-action" data-action="add-person" data-role="${role}" data-index="${index}">+ Add custom</button>
-                            </div>
+                            <input type="text" class="editable-input hidden" data-custom-input="${role}" data-index="${index}" placeholder="Enter custom label">
                         </div>
                     </td>
                 `;
@@ -695,6 +696,26 @@
 
             renderRaciTable();
 
+            const commitCustomInput = (input) => {
+                if (!input || input.dataset.processed === 'true') return;
+                input.dataset.processed = 'true';
+                const field = input.dataset.field;
+                const index = parseInt(input.dataset.index, 10);
+                if (!field || Number.isNaN(index)) {
+                    renderRaciTable();
+                    return;
+                }
+                const value = input.value.trim();
+                const previousValue = input.dataset.previousValue || '';
+                if (value) {
+                    customPeople.add(value);
+                    projectData.raciData[index][field] = [value];
+                } else {
+                    projectData.raciData[index][field] = previousValue ? [previousValue] : [];
+                }
+                renderRaciTable();
+            };
+
             raciTable.addEventListener('input', (event) => {
                 if (isRaciLocked) {
                     return;
@@ -738,18 +759,14 @@
                 if (Number.isNaN(index)) return;
                 const field = target.dataset.field;
 
-                if (target.multiple && field) {
-                    projectData.raciData[index][field] = Array.from(target.selectedOptions).map(option => option.value);
-                }
-
                 if (field === 'dueDateType') {
                     projectData.raciData[index].dueDate.type = target.value;
                     if (target.value === 'text' && !projectData.raciData[index].dueDate.value) {
                         projectData.raciData[index].dueDate.value = '';
                     }
                     renderRaciTable();
+                    return;
                 }
-            });
 
             raciTable.addEventListener('click', (event) => {
                 if (isRaciLocked) {
@@ -768,8 +785,34 @@
                         if (!projectData.raciData[index][role].includes(trimmed)) {
                             projectData.raciData[index][role].push(trimmed);
                         }
-                        renderRaciTable();
+                        return;
                     }
+
+                    if (input) {
+                        input.classList.add('hidden');
+                        input.value = '';
+                        delete input.dataset.field;
+                        delete input.dataset.index;
+                        delete input.dataset.previousValue;
+                        delete input.dataset.processed;
+                    }
+                    target.classList.remove('hidden');
+                    projectData.raciData[index][field] = target.value ? [target.value] : [];
+                }
+            });
+
+            raciTable.addEventListener('keydown', (event) => {
+                const input = event.target;
+                if (input.matches('input[data-custom-input]') && event.key === 'Enter') {
+                    event.preventDefault();
+                    commitCustomInput(input);
+                }
+            });
+
+            raciTable.addEventListener('focusout', (event) => {
+                const input = event.target;
+                if (input.matches('input[data-custom-input]')) {
+                    commitCustomInput(input);
                 }
             });
 
