@@ -904,7 +904,20 @@
                 if (!value) {
                     return 'Date TBD';
                 }
-                const parsed = new Date(value);
+                const [yearStr, monthStr, dayStr] = String(value).split('-');
+                const year = Number.parseInt(yearStr, 10);
+                const monthIndex = Number.parseInt(monthStr, 10) - 1;
+                const day = Number.parseInt(dayStr, 10);
+                if (
+                    !Number.isFinite(year)
+                    || !Number.isFinite(monthIndex)
+                    || !Number.isFinite(day)
+                    || monthIndex < 0
+                    || monthIndex > 11
+                ) {
+                    return 'Date TBD';
+                }
+                const parsed = new Date(year, monthIndex, day);
                 if (Number.isNaN(parsed.getTime())) {
                     return 'Date TBD';
                 }
