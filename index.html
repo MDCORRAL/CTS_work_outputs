@@ -199,9 +199,8 @@
         .password-button:hover {
             background-color: #1A5490;
         }
-        .locked-table {
-            filter: blur(5px);
-            pointer-events: none;
+        .password-overlay.hidden {
+            display: none !important;
         }
         .raci-key {
             display: inline-block;
@@ -545,14 +544,14 @@
     </div>
 
     <!-- Password Protection Overlay -->
-    <div id="passwordOverlay" class="password-overlay">
+    <div id="passwordOverlay" class="password-overlay hidden">
         <div class="password-modal">
             <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Enter Password</h3>
-            <p class="text-slate-600 mb-4 text-center">Please enter the password to access the tables.</p>
+            <p id="passwordMessage" class="text-slate-600 mb-4 text-center">Please enter the password to edit tables.</p>
             <div class="space-y-4">
                 <input type="password" id="passwordInput" class="password-input" placeholder="Enter password" autocomplete="off">
                 <div class="flex justify-center">
-                    <button id="passwordSubmit" class="password-button">Unlock Tables</button>
+                    <button id="passwordSubmit" class="password-button">Unlock Editing</button>
                 </div>
                 <p id="passwordError" class="text-red-500 text-sm text-center hidden">Incorrect password. Please try again.</p>
             </div>
@@ -564,36 +563,45 @@
             // Password Protection
             const CORRECT_PASSWORD = '123';
             let isAuthenticated = false;
+            let pendingAction = null;
             const passwordOverlay = document.getElementById('passwordOverlay');
             const passwordInput = document.getElementById('passwordInput');
             const passwordSubmit = document.getElementById('passwordSubmit');
             const passwordError = document.getElementById('passwordError');
-            const timelineContainer = document.querySelector('.timeline-container');
-            const raciContainer = document.querySelector('.raci-container');
 
-            const lockTables = () => {
-                if (timelineContainer) timelineContainer.classList.add('locked-table');
-                if (raciContainer) raciContainer.classList.add('locked-table');
-                passwordOverlay.style.display = 'flex';
+            const showPasswordModal = (action) => {
+                pendingAction = action;
+                passwordOverlay.classList.remove('hidden');
+                passwordInput.focus();
             };
 
-            const unlockTables = () => {
-                if (timelineContainer) timelineContainer.classList.remove('locked-table');
-                if (raciContainer) raciContainer.classList.remove('locked-table');
-                passwordOverlay.style.display = 'none';
-                isAuthenticated = true;
+            const hidePasswordModal = () => {
+                passwordOverlay.classList.add('hidden');
+                passwordInput.value = '';
+                passwordError.classList.add('hidden');
+                pendingAction = null;
             };
 
             const checkPassword = () => {
                 const enteredPassword = passwordInput.value;
                 if (enteredPassword === CORRECT_PASSWORD) {
-                    unlockTables();
-                    passwordError.classList.add('hidden');
-                    passwordInput.value = '';
+                    isAuthenticated = true;
+                    hidePasswordModal();
+                    if (pendingAction) {
+                        pendingAction();
+                    }
                 } else {
                     passwordError.classList.remove('hidden');
                     passwordInput.value = '';
                     passwordInput.focus();
+                }
+            };
+
+            const requireAuthentication = (action) => {
+                if (isAuthenticated) {
+                    action();
+                } else {
+                    showPasswordModal(action);
                 }
             };
 
@@ -604,8 +612,12 @@
                 }
             });
 
-            // Initialize with locked tables
-            lockTables();
+            // Close modal when clicking outside
+            passwordOverlay.addEventListener('click', (e) => {
+                if (e.target === passwordOverlay) {
+                    hidePasswordModal();
+                }
+            });
             const projectData = {
                 team: [
                     { name: "Core Execution (Michael & Luis)", workload: 75, color: '#0ea5e9' },
@@ -937,8 +949,10 @@
 
             if (toggleTimelineLockBtn) {
                 toggleTimelineLockBtn.addEventListener('click', () => {
-                    isTimelineLocked = !isTimelineLocked;
-                    updateTimelineLockUI();
+                    requireAuthentication(() => {
+                        isTimelineLocked = !isTimelineLocked;
+                        updateTimelineLockUI();
+                    });
                 });
             }
 
@@ -1415,30 +1429,34 @@
 
             if (addDeliverableBtn) {
                 addDeliverableBtn.addEventListener('click', () => {
-                    if (isRaciLocked) {
-                        return;
-                    }
-                    projectData.raciData.push({
-                        id: '',
-                        deliverable: '',
-                        dueDate: { type: 'date', value: '' },
-                        R: [],
-                        A: [],
-                        C: [],
-                        I: []
+                    requireAuthentication(() => {
+                        if (isRaciLocked) {
+                            return;
+                        }
+                        projectData.raciData.push({
+                            id: '',
+                            deliverable: '',
+                            dueDate: { type: 'date', value: '' },
+                            R: [],
+                            A: [],
+                            C: [],
+                            I: []
+                        });
+                        renderRaciTable();
+                        const lastRowInput = raciTable.querySelector('tbody tr:last-child input[data-field="id"]');
+                        if (lastRowInput) {
+                            lastRowInput.focus();
+                        }
                     });
-                    renderRaciTable();
-                    const lastRowInput = raciTable.querySelector('tbody tr:last-child input[data-field="id"]');
-                    if (lastRowInput) {
-                        lastRowInput.focus();
-                    }
                 });
             }
 
             if (toggleRaciLockBtn) {
                 toggleRaciLockBtn.addEventListener('click', () => {
-                    isRaciLocked = !isRaciLocked;
-                    updateLockUI();
+                    requireAuthentication(() => {
+                        isRaciLocked = !isRaciLocked;
+                        updateLockUI();
+                    });
                 });
             }
 
