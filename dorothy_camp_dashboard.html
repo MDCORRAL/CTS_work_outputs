@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dorothy Camp Kirby School - Suspension Data Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2C5F8D 0%, #4A90C2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2C5F8D;
+        }
+
+        .metric-subtitle {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filter-group select {
+            padding: 0.5rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group select:hover {
+            border-color: #2C5F8D;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: #4A90C2;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1rem;
+            color: #2C5F8D;
+            font-size: 1.3rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        thead {
+            background: #2C5F8D;
+            color: white;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .highlight-total {
+            background-color: #fff3cd;
+            font-weight: bold;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dorothy Camp Kirby School</h1>
+        <p>Suspension Data Analysis Dashboard - Juvenile Court School</p>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-info">
+            <strong>About this data:</strong> This dashboard displays suspension data for Dorothy Camp Kirby School, a Juvenile Court School operated by Los Angeles County Office of Education. Data spans from 2017-18 to 2023-24 academic years. Note: Some values are suppressed (*) for privacy when student counts are too small.
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid" id="metricsGrid">
+            <!-- Metrics will be populated by JavaScript -->
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label for="yearFilter">Academic Year:</label>
+                <select id="yearFilter">
+                    <option value="all">All Years</option>
+                </select>
+
+                <label for="groupFilter">Student Group:</label>
+                <select id="groupFilter">
+                    <option value="all">All Groups</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Suspension Rate Trends Over Time</h3>
+                <div class="chart-wrapper">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Suspension Rates by Student Group (Latest Year)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="groupChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container full-width">
+                <h3>Suspension Types Breakdown</h3>
+                <div class="chart-wrapper">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Enrollment vs Suspensions</h3>
+                <div class="chart-wrapper">
+                    <canvas id="enrollmentChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Gender Comparison</h3>
+                <div class="chart-wrapper">
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="chart-container full-width">
+            <h3>Detailed Data Table</h3>
+            <div style="overflow-x: auto;">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Academic Year</th>
+                            <th>Student Group</th>
+                            <th>Enrollment</th>
+                            <th>Total Suspensions</th>
+                            <th>Students Suspended</th>
+                            <th>Suspension Rate</th>
+                            <th>Violent (Injury)</th>
+                            <th>Violent (No Injury)</th>
+                            <th>Defiance Only</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let charts = {};
+
+        // Load and process data
+        async function loadData() {
+            try {
+                const response = await fetch('dorothy_camp_clean_data.json');
+                allData = await response.json();
+
+                // Filter out records with null reporting category descriptions (suppressed data)
+                allData = allData.filter(d => d.reportingCategoryDescription && d.reportingCategoryDescription !== 'Not Reported');
+
+                initializeDashboard();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Error loading data. Please ensure dorothy_camp_clean_data.json is in the same directory.');
+            }
+        }
+
+        function initializeDashboard() {
+            populateFilters();
+            updateMetrics();
+            createCharts();
+            updateTable();
+        }
+
+        function populateFilters() {
+            const years = [...new Set(allData.map(d => d.academicYear))].sort();
+            const groups = [...new Set(allData.map(d => d.reportingCategoryDescription))].sort();
+
+            const yearFilter = document.getElementById('yearFilter');
+            const groupFilter = document.getElementById('groupFilter');
+
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+
+            groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = group;
+                groupFilter.appendChild(option);
+            });
+
+            yearFilter.addEventListener('change', updateDashboard);
+            groupFilter.addEventListener('change', updateDashboard);
+        }
+
+        function getFilteredData() {
+            const yearFilter = document.getElementById('yearFilter').value;
+            const groupFilter = document.getElementById('groupFilter').value;
+
+            return allData.filter(d => {
+                const yearMatch = yearFilter === 'all' || d.academicYear === yearFilter;
+                const groupMatch = groupFilter === 'all' || d.reportingCategoryDescription === groupFilter;
+                return yearMatch && groupMatch;
+            });
+        }
+
+        function updateMetrics() {
+            const data = getFilteredData();
+            const totalRecords = data.filter(d => d.reportingCategoryDescription === 'Total');
+
+            const totalEnrollment = totalRecords.reduce((sum, d) => sum + (d.cumulativeEnrollment || 0), 0);
+            const totalSuspensions = totalRecords.reduce((sum, d) => sum + (d.totalSuspensions || 0), 0);
+            const totalStudentsSuspended = totalRecords.reduce((sum, d) => sum + (d.uniqueStudentsSuspended || 0), 0);
+
+            const avgSuspensionRate = totalRecords.filter(d => d.suspensionRate !== null).reduce((sum, d, _, arr) => {
+                return sum + d.suspensionRate / arr.length;
+            }, 0);
+
+            const latestYear = Math.max(...totalRecords.map(d => d.academicYear));
+            const latestYearData = totalRecords.find(d => d.academicYear === latestYear);
+
+            const metricsHTML = `
+                <div class="metric-card">
+                    <div class="metric-label">Total Enrollment</div>
+                    <div class="metric-value">${totalEnrollment.toLocaleString()}</div>
+                    <div class="metric-subtitle">Across all years</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Suspensions</div>
+                    <div class="metric-value">${totalSuspensions.toLocaleString()}</div>
+                    <div class="metric-subtitle">All incidents</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Students Suspended</div>
+                    <div class="metric-value">${totalStudentsSuspended.toLocaleString()}</div>
+                    <div class="metric-subtitle">Unduplicated count</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg Suspension Rate</div>
+                    <div class="metric-value">${(avgSuspensionRate * 100).toFixed(1)}%</div>
+                    <div class="metric-subtitle">Mean across periods</div>
+                </div>
+            `;
+
+            document.getElementById('metricsGrid').innerHTML = metricsHTML;
+        }
+
+        function createCharts() {
+            createTrendChart();
+            createGroupChart();
+            createTypeChart();
+            createEnrollmentChart();
+            createGenderChart();
+        }
+
+        function createTrendChart() {
+            const totalData = allData.filter(d => d.reportingCategoryDescription === 'Total');
+            const years = [...new Set(totalData.map(d => d.academicYear))].sort();
+            const rates = years.map(year => {
+                const record = totalData.find(d => d.academicYear === year);
+                return record ? (record.suspensionRate * 100) : null;
+            });
+
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            if (charts.trend) charts.trend.destroy();
+
+            charts.trend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Suspension Rate (%)',
+                        data: rates,
+                        borderColor: '#2C5F8D',
+                        backgroundColor: 'rgba(44, 95, 141, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Suspension Rate (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createGroupChart() {
+            const latestYear = Math.max(...allData.map(d => d.academicYear));
+            const latestData = allData.filter(d =>
+                d.academicYear === latestYear &&
+                d.reportingCategoryDescription !== 'Total' &&
+                d.suspensionRate !== null
+            );
+
+            const groups = latestData.map(d => d.reportingCategoryDescription);
+            const rates = latestData.map(d => d.suspensionRate * 100);
+
+            const ctx = document.getElementById('groupChart').getContext('2d');
+            if (charts.group) charts.group.destroy();
+
+            charts.group = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: groups,
+                    datasets: [{
+                        label: 'Suspension Rate (%)',
+                        data: rates,
+                        backgroundColor: [
+                            '#2C5F8D', '#4A90C2', '#6BB6D6', '#8FD4E8',
+                            '#B3E5F5', '#FFB74D', '#FF8A65', '#A1887F',
+                            '#90A4AE'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Suspension Rate (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createTypeChart() {
+            const totalData = allData.filter(d => d.reportingCategoryDescription === 'Total');
+
+            const types = {
+                'Violent (Injury)': totalData.reduce((sum, d) => sum + (d.suspensionsViolentWithInjury || 0), 0),
+                'Violent (No Injury)': totalData.reduce((sum, d) => sum + (d.suspensionsViolentNoInjury || 0), 0),
+                'Weapons': totalData.reduce((sum, d) => sum + (d.suspensionsWeapons || 0), 0),
+                'Drugs': totalData.reduce((sum, d) => sum + (d.suspensionsDrugs || 0), 0),
+                'Defiance Only': totalData.reduce((sum, d) => sum + (d.suspensionsDefianceOnly || 0), 0),
+                'Other': totalData.reduce((sum, d) => sum + (d.suspensionsOther || 0), 0)
+            };
+
+            const ctx = document.getElementById('typeChart').getContext('2d');
+            if (charts.type) charts.type.destroy();
+
+            charts.type = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(types),
+                    datasets: [{
+                        data: Object.values(types),
+                        backgroundColor: [
+                            '#D32F2F', '#F44336', '#FF5722', '#FF9800',
+                            '#FFC107', '#FFEB3B'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createEnrollmentChart() {
+            const totalData = allData.filter(d => d.reportingCategoryDescription === 'Total');
+            const years = [...new Set(totalData.map(d => d.academicYear))].sort();
+
+            const enrollment = years.map(year => {
+                const record = totalData.find(d => d.academicYear === year);
+                return record ? record.cumulativeEnrollment : 0;
+            });
+
+            const suspensions = years.map(year => {
+                const record = totalData.find(d => d.academicYear === year);
+                return record ? record.totalSuspensions : 0;
+            });
+
+            const ctx = document.getElementById('enrollmentChart').getContext('2d');
+            if (charts.enrollment) charts.enrollment.destroy();
+
+            charts.enrollment = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Enrollment',
+                            data: enrollment,
+                            backgroundColor: '#4A90C2',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Total Suspensions',
+                            data: suspensions,
+                            backgroundColor: '#FF8A65',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Enrollment'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Suspensions'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createGenderChart() {
+            const genderData = allData.filter(d =>
+                ['Male', 'Female', 'Non-Binary Gender (Beginning 2019-20)'].includes(d.reportingCategoryDescription)
+            );
+
+            const years = [...new Set(genderData.map(d => d.academicYear))].sort();
+
+            const datasets = ['Male', 'Female', 'Non-Binary Gender (Beginning 2019-20)'].map((gender, idx) => {
+                const data = years.map(year => {
+                    const record = genderData.find(d =>
+                        d.academicYear === year && d.reportingCategoryDescription === gender
+                    );
+                    return record ? (record.suspensionRate * 100) : null;
+                });
+
+                return {
+                    label: gender.replace(' (Beginning 2019-20)', ''),
+                    data: data,
+                    borderColor: ['#2C5F8D', '#FF8A65', '#9C27B0'][idx],
+                    backgroundColor: ['rgba(44, 95, 141, 0.1)', 'rgba(255, 138, 101, 0.1)', 'rgba(156, 39, 176, 0.1)'][idx],
+                    borderWidth: 2,
+                    fill: false
+                };
+            });
+
+            const ctx = document.getElementById('genderChart').getContext('2d');
+            if (charts.gender) charts.gender.destroy();
+
+            charts.gender = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Suspension Rate (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTable() {
+            const data = getFilteredData();
+            const tableBody = document.getElementById('tableBody');
+
+            const rows = data.map(d => {
+                const isTotal = d.reportingCategoryDescription === 'Total';
+                return `
+                    <tr class="${isTotal ? 'highlight-total' : ''}">
+                        <td>${d.academicYear}</td>
+                        <td>${d.reportingCategoryDescription}</td>
+                        <td>${d.cumulativeEnrollment !== null ? d.cumulativeEnrollment.toLocaleString() : 'N/A'}</td>
+                        <td>${d.totalSuspensions !== null ? d.totalSuspensions.toLocaleString() : 'N/A'}</td>
+                        <td>${d.uniqueStudentsSuspended !== null ? d.uniqueStudentsSuspended.toLocaleString() : 'N/A'}</td>
+                        <td>${d.suspensionRate !== null ? (d.suspensionRate * 100).toFixed(1) + '%' : 'N/A'}</td>
+                        <td>${d.suspensionsViolentWithInjury !== null ? d.suspensionsViolentWithInjury : 'N/A'}</td>
+                        <td>${d.suspensionsViolentNoInjury !== null ? d.suspensionsViolentNoInjury : 'N/A'}</td>
+                        <td>${d.suspensionsDefianceOnly !== null ? d.suspensionsDefianceOnly : 'N/A'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tableBody.innerHTML = rows;
+        }
+
+        function updateDashboard() {
+            updateMetrics();
+            updateTable();
+        }
+
+        // Initialize dashboard when page loads
+        loadData();
+    </script>
+</body>
+</html>
